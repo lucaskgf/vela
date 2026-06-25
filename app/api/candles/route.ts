@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+export const revalidate = 60; // Cache na Edge da Vercel (1 minuto) para evitar DoS de leitura no Banco de Dados
+
+
 export async function GET() {
   try {
     // Fetch candles from MongoDB, ordered by creation date (newest first)

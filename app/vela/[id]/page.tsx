@@ -193,7 +193,7 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
           <div className="memorial-details-col">
             <div className="memorial-header">
               <p className="eyebrow" style={{ color: "var(--gold)" }}>Memorial Digital</p>
-              <h1 style={{ fontSize: "2.4rem", marginBottom: "0.5rem", color: "var(--white)" }}>{candle.nome}</h1>
+              <h1 style={{ fontSize: "2.4rem", marginBottom: "0.5rem", color: "var(--white)", wordBreak: "break-word", overflowWrap: "break-word" }}>{candle.nome}</h1>
               <div style={{ display: "flex", gap: "1rem", color: "var(--ash)", fontSize: "0.9rem", flexWrap: "wrap", marginBottom: "2rem" }}>
                 <span>Acesa em {formatDate(candle.criadoEm)}</span>
                 <span>•</span>
@@ -205,7 +205,7 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
 
             {candle.mensagem && (
               <div className="memorial-message">
-                <p className="quote" style={{ borderLeft: "2px solid var(--gold)", paddingLeft: "1.2rem", fontStyle: "italic", color: "var(--white)", fontSize: "1.1rem", marginBottom: "3rem" }}>
+                <p className="quote" style={{ borderLeft: "2px solid var(--gold)", paddingLeft: "1.2rem", fontStyle: "italic", color: "var(--white)", fontSize: "1.1rem", marginBottom: "3rem", wordBreak: "break-word", overflowWrap: "break-word" }}>
                   "{candle.mensagem}"
                 </p>
               </div>
@@ -232,8 +232,8 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
                 ) : (
                   mensagens.map(msg => (
                     <div key={msg.id} className="message-card" style={{ padding: "1.2rem", border: "1px solid var(--line)", borderRadius: "12px", background: "rgba(0,0,0,0.2)" }}>
-                      <p style={{ color: "var(--white)", marginBottom: "0.5rem" }}>{msg.mensagem}</p>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.8rem", color: "var(--ash)" }}>
+                      <p style={{ color: "var(--white)", marginBottom: "0.5rem", wordBreak: "break-word", overflowWrap: "break-word" }}>{msg.mensagem}</p>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.8rem", color: "var(--ash)", wordBreak: "break-word" }}>
                         <span style={{ color: "var(--gold)" }}>{msg.nome}</span>
                         <span>{formatDate(msg.criadoEm)}</span>
                       </div>
