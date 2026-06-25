@@ -20,6 +20,18 @@ export async function POST(req: NextRequest) {
       // A versão 2.0.0 do webhook da Hotmart encapsula os dados em um objeto "data".
       const eventData = body.data || body;
       const productId = eventData.product?.id?.toString();
+      const transactionId = eventData.purchase?.transaction || eventData.transaction || null;
+
+      // Proteção de Idempotência (Replay Attack)
+      if (transactionId) {
+        const transacaoExistente = await prisma.candle.findUnique({
+          where: { transactionId }
+        });
+        if (transacaoExistente) {
+          console.log(`Transação ${transactionId} já processada. Ignorando Replay Attack.`);
+          return NextResponse.json({ success: true, message: "Idempotency catch" });
+        }
+      }
 
       // Configuração Padrão (Fallback)
       let valor = 0;
@@ -61,10 +73,11 @@ export async function POST(req: NextRequest) {
             data: { 
               status: "ATIVA",
               comprador: nomeComprador,
+              transactionId: transactionId
               // Opcional: atualizar dias/valor caso o que ele pagou na hotmart seja diferente do que clicou, mas vamos manter o da DB.
             }
           });
-          console.log(`Vela ${velaPendente.id} ativada com sucesso!`);
+          console.log(`Vela ${velaPendente.id} ativada com sucesso! Transação: ${transactionId}`);
         } else {
           // Fallback: se não achar a vela pendente (comprador burlou o sistema ou demorou), cria uma vela simples
           await prisma.candle.create({
@@ -73,6 +86,7 @@ export async function POST(req: NextRequest) {
               mensagem: "Uma luz acesa com fé e gratidão.",
               comprador: nomeComprador,
               compradorEmail: compradorEmail,
+              transactionId: transactionId,
               status: "ATIVA",
               valor,
               dias,
