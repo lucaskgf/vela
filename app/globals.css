@@ -305,22 +305,38 @@ header{
   display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
 }
 .glow{
-  position:absolute;top:-6px;left:50%;
-  width:58px;height:58px;
+  position:absolute;top:-10px;left:50%;
+  width:70px;height:70px;
   transform:translateX(-50%);
-  background:radial-gradient(circle, var(--amber-glow), transparent 70%);
-  filter:blur(5px);
-  animation:glowPulse 2.6s ease-in-out infinite;
+  background:radial-gradient(circle, rgba(255, 170, 0, 0.4), transparent 60%);
+  filter:blur(6px);
+  animation:glowPulse 2s ease-in-out infinite alternate;
   pointer-events:none;
 }
-@keyframes glowPulse{0%,100%{opacity:.65;transform:translateX(-50%) scale(.92);}50%{opacity:1;transform:translateX(-50%) scale(1.08);}}
+@keyframes glowPulse{
+  0% { opacity: 0.6; transform: translateX(-50%) scale(0.9); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+}
 .flame{
   position:relative;z-index:2;
-  width:13px;height:21px;
-  border-radius:50% 50% 50% 50% / 62% 62% 38% 38%;
-  background:radial-gradient(circle at 50% 78%, #fff8df 0%, var(--amber) 38%, #d9711c 72%, transparent 100%);
+  width:14px;height:24px;
+  border-radius:50% 50% 20% 20% / 60% 60% 40% 40%;
+  background: #fffcee;
+  box-shadow: 
+    0 -4px 8px 2px #ffeb3b,
+    0 -10px 14px 4px #ff9800,
+    0 -16px 20px 6px #e65100;
   transform-origin:50% 100%;
-  animation:flicker 2.3s ease-in-out infinite;
+  animation:flicker 2.5s ease-in-out infinite alternate;
+}
+.flame::after{
+  content: ''; position: absolute;
+  bottom: 1px; left: 50%;
+  width: 6px; height: 10px;
+  background: white;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  filter: blur(1px);
 }
 @keyframes flicker{
   0%,100%{transform:scale(1,1) rotate(-1.5deg);}
@@ -329,20 +345,29 @@ header{
   70%{transform:scale(.97,1.03) rotate(2deg);}
   85%{transform:scale(1.02,.98) rotate(-1deg);}
 }
-.wick{width:2px;height:5px;background:#2a2018;z-index:2;}
+.wick{width:2px;height:5px;background:#1a1005;z-index:2;margin-top:-2px;}
 .wax{
   width:24px;
-  border-radius:5px 5px 2px 2px;
-  background:linear-gradient(180deg,var(--wax),var(--wax-dark));
-  box-shadow:inset 0 0 6px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08);
+  border-radius:4px 4px 2px 2px;
+  background:linear-gradient(to bottom, #fff3cd 0%, #f4d068 15%, #d19525 50%, #8b5a15 100%);
+  box-shadow:inset -3px 0 6px rgba(0,0,0,0.3), inset 3px 0 6px rgba(255,255,255,0.4), 0 4px 8px rgba(0,0,0,0.6);
   position:relative;
   transition:height 1s ease;
   min-height:6px;
 }
 .wax::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:5px;
-  background:radial-gradient(ellipse at 50% 0%, rgba(245,176,65,0.5), transparent 70%);
-  border-radius:5px 5px 0 0;
+  content:'';position:absolute;top:0;left:0;right:0;height:6px;
+  background:radial-gradient(ellipse at center, #ffe082 0%, #d4af37 100%);
+  border-radius:50%;
+  box-shadow:inset 0 1px 2px rgba(255,255,255,0.8);
+}
+.wax::after{
+  content: ''; position: absolute;
+  top: 4px; left: 3px;
+  width: 3px; height: 12px;
+  background: #f4d068;
+  border-radius: 2px;
+  box-shadow: 1px 2px 2px rgba(0,0,0,0.2);
 }
 .candle-name{
   font-family:var(--serif);
