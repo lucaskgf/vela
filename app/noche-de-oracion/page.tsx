@@ -14,8 +14,8 @@ type Candle = {
   criadoEm: string;
 };
 
-// Royalty-free ambient spiritual/pad audio (Pixabay)
-const AUDIO_URL = "https://cdn.pixabay.com/download/audio/2022/11/22/audio_65bd071676.mp3?filename=ambient-piano-amp-strings-10711.mp3";
+// Royalty-free ambient spiritual/pad audio (Erik Satie - Gymnopédie No. 1 - Domínio Público via Wikimedia)
+const AUDIO_URL = "https://upload.wikimedia.org/wikipedia/commons/5/5b/Gymnop%C3%A9die_No._1.ogg";
 
 function diasRestantes(criadoEm: string, dias: number) {
   const elapsed = (Date.now() - new Date(criadoEm).getTime()) / 86400000;
