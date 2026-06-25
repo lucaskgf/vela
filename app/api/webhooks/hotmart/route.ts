@@ -9,9 +9,11 @@ export async function POST(req: NextRequest) {
     // O webhook da Hotmart envia diversos eventos. Só nos interessa quando a compra é aprovada.
     if (body.event === "PURCHASE_APPROVED") {
       
-      // Lógica para definir o tamanho da vela com base no ID do Produto na Hotmart.
-      // Substitua esses IDs "123456" pelos IDs reais que você vai criar lá na plataforma Hotmart.
-      const productId = body.product?.id;
+      // A versão 2.0.0 do webhook da Hotmart encapsula os dados em um objeto "data".
+      const eventData = body.data || body;
+
+      // Substitua esses IDs pelos IDs reais que você vai criar na plataforma Hotmart.
+      const productId = eventData.product?.id?.toString();
       let valor = 5;
       let dias = 30;
       
@@ -24,14 +26,15 @@ export async function POST(req: NextRequest) {
       }
       
       const maxAltura = dias <= 30 ? 26 : dias <= 90 ? 40 : 54;
+      const nomeComprador = eventData.buyer?.name || "Anônimo";
 
       // Salvando no MongoDB
       await prisma.candle.create({
         data: {
-          nome: body.buyer?.name || "Homenageado", 
+          nome: nomeComprador, 
           // Se quiser pegar o nome do homenageado e mensagem, você pode usar os "campos personalizados" no checkout da Hotmart
           mensagem: "Uma luz acesa em silêncio, com fé e gratidão.",
-          comprador: body.buyer?.name || "Anônimo",
+          comprador: nomeComprador,
           valor,
           dias,
           maxAltura,
