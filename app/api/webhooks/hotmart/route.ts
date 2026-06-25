@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
       }
       
       // Cálculo da altura máxima da chama (dias menores = chama menor)
+      const maxAltura = dias <= 5 ? 26 : dias <= 15 ? 40 : 54;
+
       // Busca no banco se há uma vela pendente aguardando pagamento deste comprador
       const compradorEmail = eventData.buyer?.email;
       const nomeComprador = eventData.buyer?.name || "Anônimo";
