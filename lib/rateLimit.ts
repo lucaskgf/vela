@@ -10,8 +10,23 @@ type RateLimitRecord = {
 const memoryCache = new Map<string, RateLimitRecord>();
 
 export function checkRateLimit(ip: string, action: string, limit: number, windowSeconds: number): boolean {
-  const key = `${ip}:${action}`;
   const now = Date.now();
+
+  // Prevenção de Memory Leak (OOM DoS): Faxineiro Automático
+  // Se houver um ataque DDoS massivo, o Map crescerá rápido. Limpamos os antigos se passar de 5000.
+  if (memoryCache.size > 5000) {
+    for (const [k, v] of memoryCache.entries()) {
+      if (now > v.resetAt) {
+        memoryCache.delete(k);
+      }
+    }
+    // Se o ataque for contínuo (IPs novos a cada segundo) e ainda estiver cheio, esvaziamos tudo pra proteger o servidor.
+    if (memoryCache.size > 5000) {
+      memoryCache.clear();
+    }
+  }
+
+  const key = `${ip}:${action}`;
   const record = memoryCache.get(key);
 
   if (!record || now > record.resetAt) {
