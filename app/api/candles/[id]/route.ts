@@ -21,7 +21,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         amens: true,
         rosas: true,
         mensagens: {
-          orderBy: { criadoEm: "desc" }
+          orderBy: { criadoEm: "desc" },
+          take: 100
         }
       }
     });

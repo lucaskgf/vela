@@ -4,11 +4,13 @@ import prisma from "@/lib/prisma";
 export async function GET() {
   try {
     // Fetch candles from MongoDB, ordered by creation date (newest first)
+    // Limite de 150 velas simultâneas para proteger a memória do servidor e navegador
     const candles = await prisma.candle.findMany({
       where: { status: "ATIVA" },
       orderBy: {
         criadoEm: 'desc'
       },
+      take: 150,
       select: {
         id: true,
         nome: true,
