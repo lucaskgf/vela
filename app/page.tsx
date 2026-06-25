@@ -136,44 +136,52 @@ export default function Home() {
     }
   };
 
-  const submitPurchase = async (e: FormEvent) => {
+  const submitPurchase = async (e: React.FormEvent) => {
     e.preventDefault();
-    const nome = formNomeRef.current?.value.trim();
-    const mensagem = formMsgRef.current?.value.trim() || null;
-    const comprador = formCompradorRef.current?.value.trim();
-    const email = formEmailRef.current?.value.trim();
-    if (!nome || !comprador || !email) return;
-
     setIsProcessing(true);
+    const nome = formNomeRef.current?.value || "";
+    const mensagem = formMsgRef.current?.value || "";
+    const comprador = formCompradorRef.current?.value || "";
+    const email = formEmailRef.current?.value || "";
 
-    // MOCK SUBMIT (in real app, redirect to Hotmart or create checkout session)
-    setTimeout(() => {
-      // Simulate webhook adding candle
-      const novaVela: Candle = {
-        id: "c" + Date.now(),
-        nome,
-        mensagem,
-        comprador,
-        valor: formValor,
-        dias: formDias,
-        maxAltura: formDias <= 30 ? 26 : formDias <= 90 ? 40 : 54,
-        criadoEm: new Date(),
-      };
+    try {
+      // Salva a vela no banco como PENDENTE
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, mensagem, comprador, email, dias: formDias }),
+      });
+      const data = await res.json();
       
-      setCandles([novaVela, ...candles]);
-      setVisibleCount(Math.max(visibleCount, 12));
-      setActiveFilter("all");
-      setSearchQuery("");
-      
+      if (data.success) {
+        // Redireciona para o checkout da Hotmart correspondente
+        let hotmartUrl = "";
+        if (formDias === 30) {
+          hotmartUrl = "https://go.hotmart.com/E106403870K";
+        } else if (formDias === 15) {
+          hotmartUrl = "https://pay.hotmart.com/J106475954M";
+        } else {
+          // Fallback para 5 dias ou caso não exista
+          alert("O link para a vela de 5 dias estará disponível em breve!");
+          setIsProcessing(false);
+          return;
+        }
+
+        // Adiciona o email e nome na URL para preencher automaticamente na Hotmart
+        const finalUrl = new URL(hotmartUrl);
+        finalUrl.searchParams.append("email", email);
+        finalUrl.searchParams.append("name", comprador);
+
+        window.location.href = finalUrl.toString();
+      } else {
+        alert("Ocorreu um erro ao iniciar o pagamento. Tente novamente.");
+        setIsProcessing(false);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao conectar com o servidor.");
       setIsProcessing(false);
-      setIsSuccess(true);
-      
-      setTimeout(() => {
-        closeForm();
-        showToast("Sua vela foi acesa 🕯️");
-        document.getElementById("mural")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 1500);
-    }, 1700);
+    }
   };
 
   // Ambient embers generator
@@ -331,17 +339,17 @@ export default function Home() {
               <div className="candle-opt">
                 <div className="mini-wax" style={{ width: 18, height: 26 }}></div>
                 <span className="price">R$ 5</span>
-                <span className="days">30 dias acesa</span>
+                <span className="days">5 dias acesa</span>
               </div>
               <div className="candle-opt">
                 <div className="mini-wax" style={{ width: 22, height: 40 }}></div>
                 <span className="price">R$ 10</span>
-                <span className="days">90 dias acesa</span>
+                <span className="days">15 dias acesa</span>
               </div>
               <div className="candle-opt">
                 <div className="mini-wax" style={{ width: 26, height: 54 }}></div>
                 <span className="price">R$ 20</span>
-                <span className="days">365 dias acesa</span>
+                <span className="days">30 dias acesa</span>
               </div>
             </div>
           </div>
@@ -400,16 +408,6 @@ export default function Home() {
               </div>
             )}
 
-            {isSuccess && (
-              <div className="success-box">
-                <div className="glow-circle">🕯️</div>
-                <h3>Sua vela foi acesa</h3>
-                <p style={{ color: "var(--ash)", fontSize: ".92rem", maxWidth: 380, margin: ".6rem auto 0" }}>
-                  A homenagem já está brilhando no Mural da Fé, e permanecerá acesa por {formDias} dias.
-                </p>
-              </div>
-            )}
-
             {!isProcessing && !isSuccess && (
               <div>
                 <h3>Acenda sua vela</h3>
@@ -438,17 +436,17 @@ export default function Home() {
                   <div className="field">
                     <label>Tamanho da vela</label>
                     <div className="candle-options">
-                      <button type="button" className={`candle-opt ${formValor === 5 && !customAmount ? "selected" : ""}`} onClick={() => handleCandleOptClick(5, 30)}>
+                      <button type="button" className={`candle-opt ${formDias === 5 && !customAmount ? "selected" : ""}`} onClick={() => handleCandleOptClick(5, 5)}>
                         <div className="mini-wax" style={{ width: 18, height: 26 }}></div>
-                        <span className="price">R$ 5</span><span className="days">30 dias</span>
+                        <span className="price">R$ 5</span><span className="days">5 dias</span>
                       </button>
-                      <button type="button" className={`candle-opt ${formValor === 10 && !customAmount ? "selected" : ""}`} onClick={() => handleCandleOptClick(10, 90)}>
+                      <button type="button" className={`candle-opt ${formDias === 15 && !customAmount ? "selected" : ""}`} onClick={() => handleCandleOptClick(10, 15)}>
                         <div className="mini-wax" style={{ width: 22, height: 40 }}></div>
-                        <span className="price">R$ 10</span><span className="days">90 dias</span>
+                        <span className="price">R$ 10</span><span className="days">15 dias</span>
                       </button>
-                      <button type="button" className={`candle-opt ${formValor === 20 && !customAmount ? "selected" : ""}`} onClick={() => handleCandleOptClick(20, 365)}>
+                      <button type="button" className={`candle-opt ${formDias === 30 && !customAmount ? "selected" : ""}`} onClick={() => handleCandleOptClick(20, 30)}>
                         <div className="mini-wax" style={{ width: 26, height: 54 }}></div>
-                        <span className="price">R$ 20</span><span className="days">365 dias</span>
+                        <span className="price">R$ 20</span><span className="days">30 dias</span>
                       </button>
                     </div>
                     <button type="button" className="chip" onClick={() => setCustomAmountVisible(!customAmountVisible)} style={{ marginBottom: ".4rem" }}>Valor personalizado</button>
@@ -459,17 +457,9 @@ export default function Home() {
                     )}
                   </div>
 
-                  <div className="field">
-                    <label>Forma de pagamento (Hotmart)</label>
-                    <div className="pay-methods">
-                      <button type="button" className={`pay-opt ${formMethod === "pix" ? "selected" : ""}`} onClick={() => setFormMethod("pix")}>Pix</button>
-                      <button type="button" className={`pay-opt ${formMethod === "cc" ? "selected" : ""}`} onClick={() => setFormMethod("cc")}>Cartão de Crédito</button>
-                    </div>
-                  </div>
-
-                  <div className="submit-row">
-                    <button type="submit" className="btn btn-solid btn-lg">Pagar e Acender — R$ {formValor}</button>
-                  </div>
+                  <button type="submit" className="btn btn-solid btn-lg btn-block" style={{ marginTop: "1rem" }}>
+                    Finalizar na Hotmart (Seguro)
+                  </button>
                 </form>
               </div>
             )}

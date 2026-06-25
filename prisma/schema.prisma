@@ -8,12 +8,14 @@ datasource db {
 }
 
 model Candle {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  nome      String
-  mensagem  String?
-  comprador String
-  valor     Float
-  dias      Int
-  maxAltura Int
-  criadoEm  DateTime @default(now())
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  nome           String
+  mensagem       String?
+  comprador      String
+  compradorEmail String?
+  status         String   @default("ATIVA")
+  valor          Float
+  dias           Int
+  maxAltura      Int
+  criadoEm       DateTime @default(now())
 }

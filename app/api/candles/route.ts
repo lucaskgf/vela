@@ -5,6 +5,7 @@ export async function GET() {
   try {
     // Fetch candles from MongoDB, ordered by creation date (newest first)
     const candles = await prisma.candle.findMany({
+      where: { status: "ATIVA" },
       orderBy: {
         criadoEm: 'desc'
       }

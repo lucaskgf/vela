@@ -29,21 +29,47 @@ export async function POST(req: NextRequest) {
       }
       
       // Cálculo da altura máxima da chama (dias menores = chama menor)
-      const maxAltura = dias <= 5 ? 26 : dias <= 15 ? 40 : 54;
+      // Busca no banco se há uma vela pendente aguardando pagamento deste comprador
+      const compradorEmail = eventData.buyer?.email;
       const nomeComprador = eventData.buyer?.name || "Anônimo";
 
-      // Salvando no MongoDB
-      await prisma.candle.create({
-        data: {
-          nome: nomeComprador, 
-          // Se quiser pegar o nome do homenageado e mensagem, você pode usar os "campos personalizados" no checkout da Hotmart
-          mensagem: "Uma luz acesa em silêncio, com fé e gratidão.",
-          comprador: nomeComprador,
-          valor,
-          dias,
-          maxAltura,
+      if (compradorEmail) {
+        // Pega a vela pendente mais recente desse email
+        const velaPendente = await prisma.candle.findFirst({
+          where: {
+            compradorEmail: compradorEmail,
+            status: "PENDENTE"
+          },
+          orderBy: { criadoEm: "desc" }
+        });
+
+        if (velaPendente) {
+          // Atualiza a vela para ATIVA e aproveita para salvar o nome oficial que veio da Hotmart
+          await prisma.candle.update({
+            where: { id: velaPendente.id },
+            data: { 
+              status: "ATIVA",
+              comprador: nomeComprador,
+              // Opcional: atualizar dias/valor caso o que ele pagou na hotmart seja diferente do que clicou, mas vamos manter o da DB.
+            }
+          });
+          console.log(`Vela ${velaPendente.id} ativada com sucesso!`);
+        } else {
+          // Fallback: se não achar a vela pendente (comprador burlou o sistema ou demorou), cria uma vela simples
+          await prisma.candle.create({
+            data: {
+              nome: nomeComprador,
+              mensagem: "Uma luz acesa com fé e gratidão.",
+              comprador: nomeComprador,
+              compradorEmail: compradorEmail,
+              status: "ATIVA",
+              valor,
+              dias,
+              maxAltura
+            }
+          });
         }
-      });
+      }
     }
 
     return NextResponse.json({ success: true });
