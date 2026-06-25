@@ -105,7 +105,8 @@ export default function NocheDeOracionPage() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // Gerar posições fixas para as velas reais não ficarem pulando no setState
+  // Gerar posições fixas para as velas baseadas em percentual
+  // Como elas usam porcentagem e estão dentro da prayer-wall-container, elas se ajustam automaticamente no resize.
   const [candlePositions, setCandlePositions] = useState<{ [id: string]: { left: number, top: number, scale: number, zIndex: number } }>({});
   
   useEffect(() => {
@@ -116,9 +117,9 @@ export default function NocheDeOracionPage() {
         if (!newPos[c.id]) {
           changed = true;
           newPos[c.id] = {
-            left: 25 + Math.random() * 50, // 25% to 75% (Área central)
-            top: 55 + Math.random() * 30, // 55% to 85% (Fundo até meio)
-            scale: 0.5 + Math.random() * 0.7, // 0.5 to 1.2
+            left: 5 + Math.random() * 90, // 5% a 95% do prayer-wall-container
+            top: 10 + Math.random() * 85, // 10% a 95% do prayer-wall-container
+            scale: 0.5 + Math.random() * 0.7, // 0.5 a 1.2
             zIndex: Math.floor(Math.random() * 100)
           };
         }
@@ -133,7 +134,7 @@ export default function NocheDeOracionPage() {
     const b = Array.from({ length: 150 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      top: Math.random() * 65, // Do topo até o meio
+      top: Math.random() * 100,
       size: 2 + Math.random() * 8,
       delay: Math.random() * 5,
       duration: 3 + Math.random() * 4
@@ -145,67 +146,77 @@ export default function NocheDeOracionPage() {
     <div className={`noche-wrapper ${isFullscreen ? 'is-fullscreen' : ''}`}>
       <audio ref={audioRef} src={AUDIO_URL} loop />
       
-      {/* Background Ambience */}
+      {/* Background Ambience isolado do fluxo flex */}
       <div className="noche-bg"></div>
-      
-      {/* Distant Lights (Bokeh) */}
-      <div className="bokeh-container">
-        {bokehs.map(b => (
-          <div 
-            key={b.id} 
-            className="bokeh-light" 
-            style={{
-              left: `${b.left}%`,
-              top: `${b.top}%`,
-              width: `${b.size}px`,
-              height: `${b.size}px`,
-              animationDelay: `${b.delay}s`,
-              animationDuration: `${b.duration}s`
-            }}
-          ></div>
-        ))}
-      </div>
 
-      {/* Real Candles (Foreground) */}
-      <div className="candles-container">
-        {candles.map(c => {
-          const pos = candlePositions[c.id];
-          if (!pos) return null;
-          return (
+      {/* HEADER: Botão voltar e Pessoas Online */}
+      <header className="noche-header">
+        <Link href="/#mural" className="btn btn-ghost" style={{ padding: "0.5rem 1rem", border: "1px solid rgba(255,255,255,0.2)" }}>← Voltar</Link>
+        <div className="viewers">
+          <span className="live-dot"></span>
+          {viewers} em oração
+        </div>
+      </header>
+
+      {/* MIDDLE: Prayer Wall Container (Área Segura e Restrita) */}
+      <main className="prayer-wall-container">
+        
+        {/* Distant Lights (Bokeh) */}
+        <div className="bokeh-container">
+          {bokehs.map(b => (
             <div 
-              key={c.id} 
-              className="noche-candle"
+              key={b.id} 
+              className="bokeh-light" 
               style={{
-                left: `${pos.left}%`,
-                top: `${pos.top}%`,
-                transform: `scale(${pos.scale})`,
-                zIndex: pos.zIndex
+                left: `${b.left}%`,
+                top: `${b.top}%`,
+                width: `${b.size}px`,
+                height: `${b.size}px`,
+                animationDelay: `${b.delay}s`,
+                animationDuration: `${b.duration}s`
               }}
-            >
-              <div className="flame-wrap">
-                <div className="glow" style={{ animationDuration: `${2.5 + Math.random()}s` }}></div>
-                <div className="flame" style={{ animationDuration: `${2.3 + Math.random()}s` }}></div>
-                <div className="wick"></div>
-                <div className="wax" style={{ height: `${alturaAtual(c.criadoEm, c.dias, c.maxAltura)}px` }}></div>
-              </div>
-              <div className="candle-label">
-                {c.nome}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* UI Overlay */}
-      <div className="noche-ui">
-        <div className="noche-header">
-          <Link href="/#mural" className="btn btn-ghost" style={{ padding: "0.5rem 1rem", border: "1px solid rgba(255,255,255,0.2)" }}>← Voltar</Link>
-          <div className="viewers">
-            <span className="live-dot"></span>
-            {viewers} em oração
-          </div>
+            ></div>
+          ))}
         </div>
 
+        {/* Real Candles (Foreground) */}
+        <div className="candles-container">
+          {candles.map(c => {
+            const pos = candlePositions[c.id];
+            if (!pos) return null;
+            return (
+              <div 
+                key={c.id} 
+                className="noche-candle"
+                style={{
+                  left: `${pos.left}%`,
+                  top: `${pos.top}%`,
+                  transform: `translate(-50%, -100%) scale(${pos.scale})`, /* Fix origin to bottom-center of coordinates */
+                  zIndex: pos.zIndex
+                }}
+              >
+                <div className="flame-wrap">
+                  <div className="glow" style={{ animationDuration: `${2.5 + Math.random()}s` }}></div>
+                  <div className="flame" style={{ animationDuration: `${2.3 + Math.random()}s` }}></div>
+                  <div className="wick"></div>
+                  <div className="wax" style={{ height: `${alturaAtual(c.criadoEm, c.dias, c.maxAltura)}px` }}></div>
+                </div>
+                <div className="candle-label">
+                  {c.nome}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </main>
+
+      {/* FOOTER: Logo e Controles (Áudio/Fullscreen) */}
+      <footer className="noche-footer">
+        <div className="footer-left">
+          <div className="logo"><span className="mark"></span> La Voz de la Cruz</div>
+          <p>Memorial Digital - Noche de Oración</p>
+        </div>
+        
         <div className="noche-controls">
           <button onClick={toggleAudio} className="ctrl-btn" title={isMuted ? "Ligar Áudio" : "Desligar Áudio"}>
             {isMuted ? "🔇" : "🔊"}
@@ -214,19 +225,15 @@ export default function NocheDeOracionPage() {
             ⛶
           </button>
         </div>
-        
-        <div className="noche-footer">
-          <div className="logo"><span className="mark"></span> La Voz de la Cruz</div>
-          <p>Memorial Digital - Noche de Oración</p>
-        </div>
-      </div>
+      </footer>
 
       <style dangerouslySetInnerHTML={{__html: `
         .noche-wrapper {
           position: fixed;
           inset: 0;
           background: #020101;
-          overflow: hidden;
+          display: flex;
+          flex-direction: column;
           font-family: var(--sans);
           color: var(--white);
         }
@@ -236,84 +243,33 @@ export default function NocheDeOracionPage() {
           inset: 0;
           background: radial-gradient(ellipse at bottom, rgba(212,175,55,0.08) 0%, transparent 60%);
           z-index: 1;
-        }
-
-        .bokeh-container {
-          position: absolute;
-          inset: 0;
-          z-index: 2;
           pointer-events: none;
         }
 
-        .bokeh-light {
-          position: absolute;
-          border-radius: 50%;
-          background: rgba(255, 215, 0, 0.4);
-          box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 140, 0, 0.6);
-          filter: blur(2px);
-          animation: pulseBokeh infinite alternate ease-in-out;
-        }
-
-        @keyframes pulseBokeh {
-          0% { opacity: 0.2; transform: scale(0.8); }
-          100% { opacity: 0.8; transform: scale(1.2); }
-        }
-
-        .candles-container {
-          position: absolute;
-          inset: 0;
-          z-index: 3;
-        }
-
-        .noche-candle {
-          position: absolute;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          transform-origin: bottom center;
-          transition: left 1s ease, top 1s ease;
-        }
-
-        .candle-label {
-          margin-top: 5px;
-          font-size: 0.75rem;
-          color: rgba(255,255,255,0.6);
-          text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-          white-space: nowrap;
+        /* Oculta Header/Footer em Fullscreen e esconde o mouse se parado (opcional, foco no visual limpo) */
+        .noche-wrapper.is-fullscreen .noche-header,
+        .noche-wrapper.is-fullscreen .noche-footer {
           opacity: 0;
-          transition: opacity 0.5s ease;
-        }
-        
-        .noche-candle:hover .candle-label {
-          opacity: 1;
-        }
-
-        /* UI Styling */
-        .noche-ui {
-          position: absolute;
-          inset: 0;
-          z-index: 10;
           pointer-events: none;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          padding: 2rem;
           transition: opacity 0.5s ease;
         }
 
-        .noche-wrapper.is-fullscreen .noche-ui {
-          opacity: 0; /* Oculta a UI principal na tela cheia */
-        }
-        
-        .noche-wrapper.is-fullscreen:hover .noche-ui {
-          opacity: 1; /* Mostra a UI se passar o mouse */
+        .noche-wrapper.is-fullscreen:hover .noche-header,
+        .noche-wrapper.is-fullscreen:hover .noche-footer {
+          opacity: 1;
+          pointer-events: auto;
         }
 
+        /* HEADER */
         .noche-header {
+          position: relative;
+          z-index: 10;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          pointer-events: auto;
+          padding: 1.5rem 2rem;
+          background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+          transition: opacity 0.3s ease;
         }
 
         .viewers {
@@ -341,20 +297,91 @@ export default function NocheDeOracionPage() {
           100% { opacity: 1; box-shadow: 0 0 8px #ff3b3b; }
         }
 
-        .noche-controls {
-          position: absolute;
-          bottom: 6rem;
-          right: 2rem;
-          display: flex;
-          gap: 1rem;
-          pointer-events: auto;
+        /* PRAYER WALL (CONTAINER CENTRAL RESTRITO) */
+        .prayer-wall-container {
+          position: relative;
+          flex: 1; 
+          z-index: 5;
+          margin: 0 20px; /* Margem extra de segurança horizontal */
+          overflow: hidden; /* Corta qualquer elemento (luz ou chama) que tentar vazar do container */
+          /* padding interno não segura a vela posicionada absoluta caso ela tenha % left muito próximo da borda
+             então o translate e o bound no JS mantêm tudo dentro do overflow. */
         }
 
-        @media (max-width: 768px) {
-          .noche-controls {
-            bottom: 7rem;
-            right: 1.5rem;
-          }
+        .bokeh-container, .candles-container {
+          position: absolute;
+          inset: 0;
+        }
+        
+        .bokeh-container {
+          pointer-events: none;
+        }
+
+        .bokeh-light {
+          position: absolute;
+          border-radius: 50%;
+          background: rgba(255, 215, 0, 0.4);
+          box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 140, 0, 0.6);
+          filter: blur(2px);
+          animation: pulseBokeh infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseBokeh {
+          0% { opacity: 0.2; transform: scale(0.8); }
+          100% { opacity: 0.8; transform: scale(1.2); }
+        }
+
+        .noche-candle {
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          transition: left 1s ease, top 1s ease;
+        }
+
+        .candle-label {
+          margin-top: 5px;
+          font-size: 0.75rem;
+          color: rgba(255,255,255,0.6);
+          text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+          white-space: nowrap;
+          opacity: 0;
+          transition: opacity 0.5s ease;
+        }
+        
+        .noche-candle:hover .candle-label {
+          opacity: 1;
+        }
+
+        /* FOOTER */
+        .noche-footer {
+          position: relative;
+          z-index: 10;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          padding: 1.5rem 2rem;
+          background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+          transition: opacity 0.3s ease;
+        }
+
+        .footer-left {
+          opacity: 0.6;
+        }
+
+        .footer-left .logo {
+          font-family: var(--serif);
+          font-size: 1.2rem;
+          margin-bottom: 0.2rem;
+        }
+
+        .footer-left p {
+          font-size: 0.85rem;
+        }
+
+        .noche-controls {
+          display: flex;
+          gap: 1rem;
         }
 
         .ctrl-btn {
@@ -378,15 +405,23 @@ export default function NocheDeOracionPage() {
           border-color: var(--gold);
         }
 
-        .noche-footer {
-          text-align: center;
-          opacity: 0.6;
-        }
-        
-        .noche-footer .logo {
-          font-family: var(--serif);
-          font-size: 1.2rem;
-          margin-bottom: 0.2rem;
+        /* Ajustes Responsivos para Mobile */
+        @media (max-width: 768px) {
+          .noche-header {
+            padding: 1rem;
+            flex-direction: column;
+            gap: 1rem;
+          }
+          .noche-footer {
+            padding: 1rem;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            text-align: center;
+          }
+          .prayer-wall-container {
+            margin: 0 10px;
+          }
         }
       `}} />
     </div>
