@@ -8,7 +8,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     
     const candle = await prisma.candle.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        nome: true,
+        mensagem: true,
+        comprador: true,
+        valor: true,
+        dias: true,
+        maxAltura: true,
+        criadoEm: true,
+        oracoes: true,
+        amens: true,
+        rosas: true,
         mensagens: {
           orderBy: { criadoEm: "desc" }
         }

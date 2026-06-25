@@ -8,6 +8,20 @@ export async function GET() {
       where: { status: "ATIVA" },
       orderBy: {
         criadoEm: 'desc'
+      },
+      select: {
+        id: true,
+        nome: true,
+        mensagem: true,
+        comprador: true,
+        valor: true,
+        dias: true,
+        maxAltura: true,
+        criadoEm: true,
+        oracoes: true,
+        amens: true,
+        rosas: true
+        // NOTE: compradorEmail is explicitly excluded for privacy
       }
     });
 
