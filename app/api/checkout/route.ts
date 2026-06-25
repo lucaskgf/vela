@@ -5,7 +5,7 @@ import { checkRateLimit } from "@/lib/rateLimit";
 export async function POST(req: NextRequest) {
   try {
     // Proteção Anti-Spam de Checkout (Máx 5 por IP por minuto)
-    const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+    const ip = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() || "127.0.0.1";
     if (!checkRateLimit(ip, "checkout", 5, 60)) {
       return NextResponse.json({ error: "Muitas tentativas. Aguarde um pouco!" }, { status: 429 });
     }

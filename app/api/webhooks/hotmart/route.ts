@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
   try {
     const expectedHottok = process.env.HOTMART_HOTTOK;
     const providedHottok = req.headers.get("x-hotmart-hottok") || req.headers.get("hottok");
 
-    if (expectedHottok && providedHottok !== expectedHottok) {
-      console.warn("Bloqueado: Requisição webhook não autorizada (hottok inválido).");
+    if (expectedHottok && providedHottok) {
+      if (expectedHottok.length !== providedHottok.length || !crypto.timingSafeEqual(Buffer.from(expectedHottok), Buffer.from(providedHottok))) {
+        console.warn("Bloqueado: Requisição webhook não autorizada (hottok inválido).");
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    } else if (expectedHottok && !providedHottok) {
+      console.warn("Bloqueado: Requisição webhook sem hottok.");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -94,6 +100,22 @@ export async function POST(req: NextRequest) {
             }
           });
         }
+      }
+    } else if (
+      body.event === "PURCHASE_CANCELED" || 
+      body.event === "PURCHASE_REFUNDED" || 
+      body.event === "PURCHASE_CHARGEBACK" ||
+      body.event === "PURCHASE_PROTEST"
+    ) {
+      const eventData = body.data || body;
+      const transactionId = eventData.purchase?.transaction || eventData.transaction || null;
+
+      if (transactionId) {
+        await prisma.candle.updateMany({
+          where: { transactionId },
+          data: { status: "CANCELADA" }
+        });
+        console.log(`Vela com transação ${transactionId} foi CANCELADA (Reembolso/Chargeback).`);
       }
     }
 
