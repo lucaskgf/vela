@@ -12,20 +12,24 @@ export async function POST(req: NextRequest) {
       // A versão 2.0.0 do webhook da Hotmart encapsula os dados em um objeto "data".
       const eventData = body.data || body;
 
-      // Substitua esses IDs pelos IDs reais que você vai criar na plataforma Hotmart.
-      const productId = eventData.product?.id?.toString();
-      let valor = 5;
+      // Configuração Padrão (Fallback)
+      let valor = 0;
       let dias = 30;
       
-      if (productId === "ID_PRODUTO_VELA_10") {
+      // Mapeamento dos produtos reais da Hotmart
+      if (productId === "7999044") {
+         valor = 5;
+         dias = 5;
+      } else if (productId === "7998952") {
          valor = 10;
-         dias = 90;
-      } else if (productId === "ID_PRODUTO_VELA_20") {
+         dias = 15;
+      } else if (productId === "7966588") {
          valor = 20;
-         dias = 365;
+         dias = 30;
       }
       
-      const maxAltura = dias <= 30 ? 26 : dias <= 90 ? 40 : 54;
+      // Cálculo da altura máxima da chama (dias menores = chama menor)
+      const maxAltura = dias <= 5 ? 26 : dias <= 15 ? 40 : 54;
       const nomeComprador = eventData.buyer?.name || "Anônimo";
 
       // Salvando no MongoDB
