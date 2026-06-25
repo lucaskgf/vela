@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
       
       // A versão 2.0.0 do webhook da Hotmart encapsula os dados em um objeto "data".
       const eventData = body.data || body;
+      const productId = eventData.product?.id?.toString();
 
       // Configuração Padrão (Fallback)
       let valor = 0;
