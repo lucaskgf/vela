@@ -14,7 +14,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const body = await req.json();
-    const { nome, mensagem } = body;
+    let { nome, mensagem } = body;
+
+    // Sanitização de Dados (Prevenção contra Data Bloating no MongoDB)
+    nome = String(nome || "Anônimo").substring(0, 50);
+    mensagem = String(mensagem || "").substring(0, 500);
 
     if (!nome || !mensagem) {
       return NextResponse.json({ error: "Nome e mensagem são obrigatórios" }, { status: 400 });

@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
+    // Proteção Anti-Spam de Checkout (Máx 5 por IP por minuto)
+    const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+    if (!checkRateLimit(ip, "checkout", 5, 60)) {
+      return NextResponse.json({ error: "Muitas tentativas. Aguarde um pouco!" }, { status: 429 });
+    }
+
     const body = await req.json();
-    const { nome, mensagem, comprador, email, dias } = body;
+    let { nome, mensagem, comprador, email, dias } = body;
+
+    // Sanitização de Dados (Prevenção contra Data Bloating no MongoDB)
+    nome = (nome || "Homenageado").substring(0, 100);
+    mensagem = (mensagem || "").substring(0, 500);
+    comprador = (comprador || "Anônimo").substring(0, 100);
+    email = email ? String(email).substring(0, 100) : null;
 
     let valor = 5;
     if (dias === 90) valor = 10;
@@ -16,9 +29,9 @@ export async function POST(req: NextRequest) {
     // Quando a Hotmart mandar o webhook, ela vai ser ativada usando o email do comprador.
     const candle = await prisma.candle.create({
       data: {
-        nome: nome || "Homenageado",
-        mensagem: mensagem || "",
-        comprador: comprador || "Anônimo",
+        nome: nome,
+        mensagem: mensagem,
+        comprador: comprador,
         compradorEmail: email,
         status: "PENDENTE",
         valor,
