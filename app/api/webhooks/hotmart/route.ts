@@ -26,9 +26,10 @@ export async function POST(req: NextRequest) {
       // A versão 2.0.0 do webhook da Hotmart encapsula os dados em um objeto "data".
       const eventData = body.data || body;
       const productId = eventData.product?.id?.toString();
-      const transactionId = eventData.purchase?.transaction || eventData.transaction || null;
+      let rawTransactionId = eventData.purchase?.transaction || eventData.transaction || null;
+      const transactionId = rawTransactionId ? String(rawTransactionId).substring(0, 255) : null;
 
-      // Proteção de Idempotência (Replay Attack)
+      // Proteção de Idempotência (Replay Attack e Corrida)
       if (transactionId) {
         const transacaoExistente = await prisma.candle.findUnique({
           where: { transactionId }
@@ -108,14 +109,24 @@ export async function POST(req: NextRequest) {
       body.event === "PURCHASE_PROTEST"
     ) {
       const eventData = body.data || body;
-      const transactionId = eventData.purchase?.transaction || eventData.transaction || null;
+      let rawTransactionId = eventData.purchase?.transaction || eventData.transaction || null;
+      const transactionId = rawTransactionId ? String(rawTransactionId).substring(0, 255) : null;
 
       if (transactionId) {
-        await prisma.candle.updateMany({
+        await prisma.candle.upsert({
           where: { transactionId },
-          data: { status: "CANCELADA" }
+          update: { status: "CANCELADA" },
+          create: {
+            nome: "Cancelado",
+            comprador: "Cancelado",
+            status: "CANCELADA",
+            transactionId: transactionId,
+            valor: 0,
+            dias: 0,
+            maxAltura: 0
+          }
         });
-        console.log(`Vela com transação ${transactionId} foi CANCELADA (Reembolso/Chargeback).`);
+        console.log(`Vela com transação ${transactionId} foi CANCELADA (Reembolso/Chargeback) ou pre-cancelada por Race Condition.`);
       }
     }
 
