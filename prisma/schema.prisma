@@ -18,4 +18,20 @@ model Candle {
   dias           Int
   maxAltura      Int
   criadoEm       DateTime @default(now())
+
+  // Interações do Memorial
+  oracoes        Int      @default(0)
+  amens          Int      @default(0)
+  rosas          Int      @default(0)
+  mensagens      SupportMessage[]
+}
+
+model SupportMessage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  candleId  String   @db.ObjectId
+  nome      String
+  mensagem  String
+  criadoEm  DateTime @default(now())
+
+  candle    Candle   @relation(fields: [candleId], references: [id], onDelete: Cascade)
 }
