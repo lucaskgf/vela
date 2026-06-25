@@ -3,6 +3,14 @@ import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
+    const expectedHottok = process.env.HOTMART_HOTTOK;
+    const providedHottok = req.headers.get("x-hotmart-hottok") || req.headers.get("hottok");
+
+    if (expectedHottok && providedHottok !== expectedHottok) {
+      console.warn("Bloqueado: Requisição webhook não autorizada (hottok inválido).");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
     console.log("Webhook Hotmart recebido:", body);
 
