@@ -42,10 +42,10 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, id: candle.id });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao gerar checkout:", error);
     return NextResponse.json(
-      { error: "Erro ao iniciar checkout" },
+      { error: "Erro ao iniciar checkout", details: error?.message || String(error) },
       { status: 500 }
     );
   }
