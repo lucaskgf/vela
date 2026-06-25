@@ -341,15 +341,30 @@ export default function Home() {
             </div>
             <div className="candle-options" style={{ maxWidth: 680, margin: "0 auto" }}>
               <div className="candle-opt">
-                <div className="mini-wax" style={{ width: 18, height: 26 }}></div>
+                <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+                  <div className="flame-wrap" style={{ transform: "scale(0.7)", transformOrigin: "bottom center" }}>
+                    <div className="glow"></div><div className="flame"></div><div className="wick"></div>
+                    <div className="wax" style={{ height: 26 }}></div>
+                  </div>
+                </div>
                 <span className="days">30 dias acesa</span>
               </div>
               <div className="candle-opt">
-                <div className="mini-wax" style={{ width: 22, height: 40 }}></div>
+                <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+                  <div className="flame-wrap" style={{ transform: "scale(0.85)", transformOrigin: "bottom center" }}>
+                    <div className="glow"></div><div className="flame"></div><div className="wick"></div>
+                    <div className="wax" style={{ height: 40 }}></div>
+                  </div>
+                </div>
                 <span className="days">90 dias acesa</span>
               </div>
               <div className="candle-opt">
-                <div className="mini-wax" style={{ width: 26, height: 54 }}></div>
+                <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+                  <div className="flame-wrap" style={{ transform: "scale(1)", transformOrigin: "bottom center" }}>
+                    <div className="glow"></div><div className="flame"></div><div className="wick"></div>
+                    <div className="wax" style={{ height: 54 }}></div>
+                  </div>
+                </div>
                 <span className="days">365 dias acesa</span>
               </div>
             </div>
@@ -438,15 +453,30 @@ export default function Home() {
                     <label>Tamanho da vela</label>
                     <div className="candle-options">
                       <button type="button" className={`candle-opt ${formDias === 30 ? "selected" : ""}`} onClick={() => handleCandleOptClick(0, 30)}>
-                        <div className="mini-wax" style={{ width: 18, height: 26 }}></div>
+                        <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+                          <div className="flame-wrap" style={{ transform: "scale(0.7)", transformOrigin: "bottom center", pointerEvents: "none" }}>
+                            <div className="glow"></div><div className="flame"></div><div className="wick"></div>
+                            <div className="wax" style={{ height: 26 }}></div>
+                          </div>
+                        </div>
                         <span className="days">30 dias</span>
                       </button>
                       <button type="button" className={`candle-opt ${formDias === 90 ? "selected" : ""}`} onClick={() => handleCandleOptClick(0, 90)}>
-                        <div className="mini-wax" style={{ width: 22, height: 40 }}></div>
+                        <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+                          <div className="flame-wrap" style={{ transform: "scale(0.85)", transformOrigin: "bottom center", pointerEvents: "none" }}>
+                            <div className="glow"></div><div className="flame"></div><div className="wick"></div>
+                            <div className="wax" style={{ height: 40 }}></div>
+                          </div>
+                        </div>
                         <span className="days">90 dias</span>
                       </button>
                       <button type="button" className={`candle-opt ${formDias === 365 ? "selected" : ""}`} onClick={() => handleCandleOptClick(0, 365)}>
-                        <div className="mini-wax" style={{ width: 26, height: 54 }}></div>
+                        <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+                          <div className="flame-wrap" style={{ transform: "scale(1)", transformOrigin: "bottom center", pointerEvents: "none" }}>
+                            <div className="glow"></div><div className="flame"></div><div className="wick"></div>
+                            <div className="wax" style={{ height: 54 }}></div>
+                          </div>
+                        </div>
                         <span className="days">365 dias</span>
                       </button>
                     </div>
