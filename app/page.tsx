@@ -513,14 +513,9 @@ export default function Home() {
             <p className="detail-msg">{activeCandle.mensagem || "Uma luz acesa em silêncio, com fé e gratidão."}</p>
             <p className="detail-buyer">Homenagem de: {activeCandle.comprador}</p>
             
-            <Link href={`/vela/${activeCandle.id}`} className="btn btn-solid btn-block" style={{ marginTop: "1rem", marginBottom: "1rem", textAlign: "center", textDecoration: "none" }}>
+            <Link href={`/vela/${activeCandle.id}`} className="btn btn-solid btn-block" style={{ marginTop: "1rem", textAlign: "center", textDecoration: "none" }}>
               Ver Memorial Completo
             </Link>
-
-            <div className="share-row">
-              <a className="share-btn" href={`https://wa.me/?text=${encodeURIComponent(`Acendi uma vela em homenagem a ${activeCandle.nome} no La Voz de la Cruz 🕯️`)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
-              <button className="share-btn" onClick={() => { navigator.clipboard?.writeText(window.location.href); showToast("Link copiado!"); }}>Copiar link</button>
-            </div>
           </div>
         </div>
       )}
