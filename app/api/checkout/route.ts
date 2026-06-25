@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
     const maxAltura = dias <= 30 ? 26 : dias <= 90 ? 40 : 54;
 
     // Criamos a vela como PENDENTE no banco.
-    // Quando a Hotmart mandar o webhook, ela vai ser ativada usando o email do comprador.
+    // Usamos um transactionId temporário pois o MongoDB bloqueia múltiplos campos null com @unique
+    const tempTransactionId = `PENDING_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const candle = await prisma.candle.create({
       data: {
         nome: nome,
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
         comprador: comprador,
         compradorEmail: email,
         status: "PENDENTE",
+        transactionId: tempTransactionId,
         valor,
         dias,
         maxAltura,
@@ -45,7 +47,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("Erro ao gerar checkout:", error);
     return NextResponse.json(
-      { error: "Erro ao iniciar checkout", details: error?.message || String(error) },
+      { error: "Erro ao iniciar checkout" },
       { status: 500 }
     );
   }
