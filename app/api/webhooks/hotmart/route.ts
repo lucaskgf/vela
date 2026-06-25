@@ -17,14 +17,14 @@ export async function POST(req: NextRequest) {
       let valor = 0;
       let dias = 30;
       
-      // Mapeamento dos produtos reais da Hotmart (VAMOS ATUALIZAR OS IDs DEPOIS)
-      if (productId === "7999044") {
+      // Mapeamento dos produtos reais da Hotmart
+      if (productId === "7966588") {
          valor = 5;
          dias = 30;
       } else if (productId === "7998952") {
          valor = 10;
          dias = 90;
-      } else if (productId === "7966588") {
+      } else if (productId === "7999044") {
          valor = 20;
          dias = 365;
       }

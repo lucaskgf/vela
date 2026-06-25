@@ -157,9 +157,9 @@ export default function Home() {
         // Redireciona para o checkout da Hotmart correspondente
         let hotmartUrl = "";
         if (formDias === 30) {
-          hotmartUrl = "https://go.hotmart.com/E106403870K"; // O link original de 30 dias
+          hotmartUrl = "https://pay.hotmart.com/E106403870K";
         } else if (formDias === 90) {
-          hotmartUrl = "https://pay.hotmart.com/J106475954M"; // Temporário, era o de 15
+          hotmartUrl = "https://pay.hotmart.com/J106475954M";
         } else {
           // Fallback para 365 dias ou caso não exista
           alert("O link para a vela de 365 dias estará disponível em breve!");
