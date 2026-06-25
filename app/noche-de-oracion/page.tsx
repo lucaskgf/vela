@@ -116,9 +116,9 @@ export default function NocheDeOracionPage() {
         if (!newPos[c.id]) {
           changed = true;
           newPos[c.id] = {
-            left: 10 + Math.random() * 80, // 10% to 90%
-            top: 50 + Math.random() * 45, // 50% to 95%
-            scale: 0.4 + Math.random() * 0.8, // 0.4 to 1.2
+            left: 25 + Math.random() * 50, // 25% to 75% (Área central)
+            top: 55 + Math.random() * 30, // 55% to 85% (Fundo até meio)
+            scale: 0.5 + Math.random() * 0.7, // 0.5 to 1.2
             zIndex: Math.floor(Math.random() * 100)
           };
         }
@@ -343,11 +343,18 @@ export default function NocheDeOracionPage() {
 
         .noche-controls {
           position: absolute;
-          bottom: 2rem;
+          bottom: 6rem;
           right: 2rem;
           display: flex;
           gap: 1rem;
           pointer-events: auto;
+        }
+
+        @media (max-width: 768px) {
+          .noche-controls {
+            bottom: 7rem;
+            right: 1.5rem;
+          }
         }
 
         .ctrl-btn {
