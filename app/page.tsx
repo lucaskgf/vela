@@ -304,8 +304,12 @@ export default function Home() {
                 {visibleCandles.map((c, i) => (
                   <button key={c.id} className="candle" style={{ animationDelay: `${i * 0.03}s` }} onClick={() => openDetail(c)}>
                     <div className="flame-wrap">
-                      <div className="glow"></div>
-                      <div className="flame"></div>
+                      {diasRestantes(c) > 0 && (
+                        <>
+                          <div className="glow"></div>
+                          <div className="flame"></div>
+                        </>
+                      )}
                       <div className="wick"></div>
                       <div className="wax" style={{ height: `${alturaAtual(c)}px` }}></div>
                     </div>
@@ -464,10 +468,14 @@ export default function Home() {
           <div className="modal detail-modal">
             <button className="modal-close" onClick={closeDetail}>✕</button>
             <div className="flame-wrap" style={{ margin: "0 auto 1rem" }}>
-              <div className="glow"></div>
-              <div className="flame"></div>
+              {diasRestantes(activeCandle) > 0 && (
+                <>
+                  <div className="glow"></div>
+                  <div className="flame"></div>
+                </>
+              )}
               <div className="wick"></div>
-              <div className="wax" style={{ height: 46, width: 30 }}></div>
+              <div className="wax" style={{ height: `${alturaAtual(activeCandle)}px`, width: 30 }}></div>
             </div>
             <h3 className="detail-name">{activeCandle.nome}</h3>
             <p className="detail-date">Acesa em {formatDate(activeCandle.criadoEm)} · {diasRestantes(activeCandle)} dias restantes</p>
