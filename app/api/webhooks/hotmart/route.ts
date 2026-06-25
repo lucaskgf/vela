@@ -17,20 +17,20 @@ export async function POST(req: NextRequest) {
       let valor = 0;
       let dias = 30;
       
-      // Mapeamento dos produtos reais da Hotmart
+      // Mapeamento dos produtos reais da Hotmart (VAMOS ATUALIZAR OS IDs DEPOIS)
       if (productId === "7999044") {
          valor = 5;
-         dias = 5;
+         dias = 30;
       } else if (productId === "7998952") {
          valor = 10;
-         dias = 15;
+         dias = 90;
       } else if (productId === "7966588") {
          valor = 20;
-         dias = 30;
+         dias = 365;
       }
       
       // Cálculo da altura máxima da chama (dias menores = chama menor)
-      const maxAltura = dias <= 5 ? 26 : dias <= 15 ? 40 : 54;
+      const maxAltura = dias <= 30 ? 26 : dias <= 90 ? 40 : 54;
 
       // Busca no banco se há uma vela pendente aguardando pagamento deste comprador
       const compradorEmail = eventData.buyer?.email;

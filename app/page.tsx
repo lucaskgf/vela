@@ -157,12 +157,12 @@ export default function Home() {
         // Redireciona para o checkout da Hotmart correspondente
         let hotmartUrl = "";
         if (formDias === 30) {
-          hotmartUrl = "https://go.hotmart.com/E106403870K";
-        } else if (formDias === 15) {
-          hotmartUrl = "https://pay.hotmart.com/J106475954M";
+          hotmartUrl = "https://go.hotmart.com/E106403870K"; // O link original de 30 dias
+        } else if (formDias === 90) {
+          hotmartUrl = "https://pay.hotmart.com/J106475954M"; // Temporário, era o de 15
         } else {
-          // Fallback para 5 dias ou caso não exista
-          alert("O link para a vela de 5 dias estará disponível em breve!");
+          // Fallback para 365 dias ou caso não exista
+          alert("O link para a vela de 365 dias estará disponível em breve!");
           setIsProcessing(false);
           return;
         }
@@ -338,18 +338,15 @@ export default function Home() {
             <div className="candle-options" style={{ maxWidth: 680, margin: "0 auto" }}>
               <div className="candle-opt">
                 <div className="mini-wax" style={{ width: 18, height: 26 }}></div>
-                <span className="price">R$ 5</span>
-                <span className="days">5 dias acesa</span>
+                <span className="days">30 dias acesa</span>
               </div>
               <div className="candle-opt">
                 <div className="mini-wax" style={{ width: 22, height: 40 }}></div>
-                <span className="price">R$ 10</span>
-                <span className="days">15 dias acesa</span>
+                <span className="days">90 dias acesa</span>
               </div>
               <div className="candle-opt">
                 <div className="mini-wax" style={{ width: 26, height: 54 }}></div>
-                <span className="price">R$ 20</span>
-                <span className="days">30 dias acesa</span>
+                <span className="days">365 dias acesa</span>
               </div>
             </div>
           </div>
@@ -436,25 +433,19 @@ export default function Home() {
                   <div className="field">
                     <label>Tamanho da vela</label>
                     <div className="candle-options">
-                      <button type="button" className={`candle-opt ${formDias === 5 && !customAmount ? "selected" : ""}`} onClick={() => handleCandleOptClick(5, 5)}>
+                      <button type="button" className={`candle-opt ${formDias === 30 ? "selected" : ""}`} onClick={() => handleCandleOptClick(0, 30)}>
                         <div className="mini-wax" style={{ width: 18, height: 26 }}></div>
-                        <span className="price">R$ 5</span><span className="days">5 dias</span>
+                        <span className="days">30 dias</span>
                       </button>
-                      <button type="button" className={`candle-opt ${formDias === 15 && !customAmount ? "selected" : ""}`} onClick={() => handleCandleOptClick(10, 15)}>
+                      <button type="button" className={`candle-opt ${formDias === 90 ? "selected" : ""}`} onClick={() => handleCandleOptClick(0, 90)}>
                         <div className="mini-wax" style={{ width: 22, height: 40 }}></div>
-                        <span className="price">R$ 10</span><span className="days">15 dias</span>
+                        <span className="days">90 dias</span>
                       </button>
-                      <button type="button" className={`candle-opt ${formDias === 30 && !customAmount ? "selected" : ""}`} onClick={() => handleCandleOptClick(20, 30)}>
+                      <button type="button" className={`candle-opt ${formDias === 365 ? "selected" : ""}`} onClick={() => handleCandleOptClick(0, 365)}>
                         <div className="mini-wax" style={{ width: 26, height: 54 }}></div>
-                        <span className="price">R$ 20</span><span className="days">30 dias</span>
+                        <span className="days">365 dias</span>
                       </button>
                     </div>
-                    <button type="button" className="chip" onClick={() => setCustomAmountVisible(!customAmountVisible)} style={{ marginBottom: ".4rem" }}>Valor personalizado</button>
-                    {customAmountVisible && (
-                      <div className="custom-amount show">
-                        <input type="number" min="1" step="1" placeholder="Valor em R$" value={customAmount} onChange={(e) => handleCustomInput(e.target.value)} />
-                      </div>
-                    )}
                   </div>
 
                   <button type="submit" className="btn btn-solid btn-lg btn-block" style={{ marginTop: "1rem" }}>

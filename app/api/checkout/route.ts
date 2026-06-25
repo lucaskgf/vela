@@ -7,10 +7,10 @@ export async function POST(req: NextRequest) {
     const { nome, mensagem, comprador, email, dias } = body;
 
     let valor = 5;
-    if (dias === 15) valor = 10;
-    if (dias === 30) valor = 20;
+    if (dias === 90) valor = 10;
+    if (dias === 365) valor = 20;
 
-    const maxAltura = dias <= 5 ? 26 : dias <= 15 ? 40 : 54;
+    const maxAltura = dias <= 30 ? 26 : dias <= 90 ? 40 : 54;
 
     // Criamos a vela como PENDENTE no banco.
     // Quando a Hotmart mandar o webhook, ela vai ser ativada usando o email do comprador.
