@@ -14,8 +14,9 @@ type Candle = {
   criadoEm: string;
 };
 
-// Royalty-free ambient spiritual/pad audio (Erik Satie - Gymnopédie No. 1 - Domínio Público via Wikimedia)
-const AUDIO_URL = "https://upload.wikimedia.org/wikipedia/commons/5/5b/Gymnop%C3%A9die_No._1.ogg";
+// O áudio agora será lido do seu próprio servidor para evitar bloqueios ou erro de formato no Safari/iOS.
+// Para colocar a música definitiva, salve um arquivo MP3 chamado "ambient.mp3" dentro da pasta "public" do projeto.
+const AUDIO_URL = "/ambient.mp3";
 
 function diasRestantes(criadoEm: string, dias: number) {
   const elapsed = (Date.now() - new Date(criadoEm).getTime()) / 86400000;
