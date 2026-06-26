@@ -1,30 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { getClientIp } from "@/lib/ip";
+import { PLANS, isValidDias } from "@/lib/hotmart";
 
 export async function POST(req: NextRequest) {
   try {
     // Proteção Anti-Spam de Checkout (Máx 5 por IP por minuto)
-    // x-real-ip é o IP real do cliente na Vercel. Fallback: PRIMEIRO IP do x-forwarded-for (não o último, que é o proxy)
-    const ip = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
-    if (!checkRateLimit(ip, "checkout", 5, 60)) {
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit(ip, "checkout", 5, 60))) {
       return NextResponse.json({ error: "Muitas tentativas. Aguarde um pouco!" }, { status: 429 });
     }
 
     const body = await req.json();
-    let { nome, mensagem, comprador, email, dias } = body;
+    let { nome, mensagem, comprador, email } = body;
+    const { dias } = body;
+
+    // Validação centralizada do plano — rejeita dias inválidos ANTES de tocar no banco.
+    const diasNum = Number(dias);
+    if (!isValidDias(diasNum)) {
+      return NextResponse.json({ error: "Plano inválido" }, { status: 400 });
+    }
+    const plan = PLANS[diasNum];
+
+    // CRÍTICO: Se o plano ainda não tem link de checkout configurado, NÃO criamos a vela.
+    // Antes deste guard, o fluxo criava uma vela PENDENTE e depois falhava no cliente,
+    // deixando centenas de velas órfãs no banco. Agora bloqueamos cedo.
+    if (!plan.checkoutUrl) {
+      return NextResponse.json(
+        { error: "Este plano ainda não está disponível para compra. Em breve!" },
+        { status: 409 }
+      );
+    }
 
     // Sanitização de Dados (Prevenção contra Data Bloating no MongoDB)
     nome = (nome || "Homenageado").substring(0, 100);
     mensagem = (mensagem || "").substring(0, 500);
     comprador = (comprador || "Anônimo").substring(0, 100);
     email = email ? String(email).substring(0, 100) : null;
-
-    let valor = 5;
-    if (dias === 90) valor = 10;
-    if (dias === 365) valor = 20;
-
-    const maxAltura = dias <= 30 ? 26 : dias <= 90 ? 40 : 54;
 
     // Criamos a vela como PENDENTE no banco.
     // Usamos um transactionId temporário pois o MongoDB bloqueia múltiplos campos null com @unique
@@ -37,14 +50,14 @@ export async function POST(req: NextRequest) {
         compradorEmail: email,
         status: "PENDENTE",
         transactionId: tempTransactionId,
-        valor,
-        dias,
-        maxAltura,
+        valor: plan.valor,
+        dias: plan.dias,
+        maxAltura: plan.maxAltura,
       }
     });
 
-    return NextResponse.json({ success: true, id: candle.id });
-  } catch (error: any) {
+    return NextResponse.json({ success: true, id: candle.id, checkoutUrl: plan.checkoutUrl });
+  } catch (error: unknown) {
     console.error("Erro ao gerar checkout:", error);
     return NextResponse.json(
       { error: "Erro ao iniciar checkout" },

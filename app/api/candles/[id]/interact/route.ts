@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { getClientIp } from "@/lib/ip";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const p = await params;
     const { id } = p;
-    
+
     // Proteção Anti-Spam (Máx 60 cliques por IP por minuto)
-    const ip = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
-    if (!checkRateLimit(ip, "interact", 60, 60)) {
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit(ip, "interact", 60, 60))) {
       return NextResponse.json({ error: "Muitas interações. Vá com calma!" }, { status: 429 });
     }
 

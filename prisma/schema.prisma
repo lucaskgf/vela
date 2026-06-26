@@ -25,6 +25,13 @@ model Candle {
   amens          Int      @default(0)
   rosas          Int      @default(0)
   mensagens      SupportMessage[]
+
+  // Índices compostos para as queries mais frequentes.
+  // Antes destes índices, as queries faziam collection scan no MongoDB.
+  //   - lista do mural: filtra por status e ordena por criadoEm desc
+  //   - webhook: busca vela pendente por compradorEmail ordenada por criadoEm desc
+  @@index([status, criadoEm])
+  @@index([compradorEmail, status, criadoEm])
 }
 
 model SupportMessage {
@@ -33,6 +40,9 @@ model SupportMessage {
   nome      String
   mensagem  String
   criadoEm  DateTime @default(now())
+
+  // Índice para ordenar mensagens por data dentro de uma vela.
+  @@index([candleId, criadoEm])
 
   candle    Candle   @relation(fields: [candleId], references: [id], onDelete: Cascade)
 }

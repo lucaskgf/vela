@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
+import { PLANS_BY_PRODUCT, calcMaxAltura } from "@/lib/hotmart";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,15 +19,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    console.log("Webhook Hotmart recebido:", body);
+    // Logamos apenas o evento (sem PII do comprador) — commit 9454171 havia exposto
+    // e-mail/nome nos logs da Vercel, o que é um problema de LGPD em produção.
+    console.log("Webhook Hotmart recebido:", body.event);
 
     // O webhook da Hotmart envia diversos eventos. Só nos interessa quando a compra é aprovada.
     if (body.event === "PURCHASE_APPROVED") {
-      
+
       // A versão 2.0.0 do webhook da Hotmart encapsula os dados em um objeto "data".
       const eventData = body.data || body;
       const productId = eventData.product?.id?.toString();
-      let rawTransactionId = eventData.purchase?.transaction || eventData.transaction || null;
+      const rawTransactionId = eventData.purchase?.transaction || eventData.transaction || null;
       const transactionId = rawTransactionId ? String(rawTransactionId).substring(0, 255) : null;
 
       // Proteção de Idempotência (Replay Attack e Corrida)
@@ -40,24 +43,12 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Configuração Padrão (Fallback)
-      let valor = 0;
-      let dias = 30;
-      
-      // Mapeamento dos produtos reais da Hotmart
-      if (productId === "7966588") {
-         valor = 5;
-         dias = 30;
-      } else if (productId === "7998952") {
-         valor = 10;
-         dias = 90;
-      } else if (productId === "7999044") {
-         valor = 20;
-         dias = 365;
-      }
-      
-      // Cálculo da altura máxima da chama (dias menores = chama menor)
-      const maxAltura = dias <= 30 ? 26 : dias <= 90 ? 40 : 54;
+      // Plano vem da fonte centralizada (hotmart.ts). Se o produto for desconhecido,
+      // usamos um fallback conservador em vez de chutar valor/dias.
+      const plan = productId ? PLANS_BY_PRODUCT[productId] : undefined;
+      const valor = plan?.valor ?? 0;
+      const dias = plan?.dias ?? 30;
+      const maxAltura = plan?.maxAltura ?? calcMaxAltura(dias);
 
       // Busca no banco se há uma vela pendente aguardando pagamento deste comprador
       const compradorEmail = eventData.buyer?.email;
@@ -74,19 +65,25 @@ export async function POST(req: NextRequest) {
         });
 
         if (velaPendente) {
-          // Atualiza a vela para ATIVA e aproveita para salvar o nome oficial que veio da Hotmart
+          // Atualiza a vela para ATIVA e aproveita para salvar o nome oficial que veio da Hotmart.
+          // Importante: quando o plano pago difere do plano selecionado no checkout (ex: cliente
+          // selecionou 365 mas pagou o produto de 30), confiamos no que foi PAGO (plano do webhook),
+          // não no que foi clicado — isso evita ativar uma vela de 365 dias por R$5.
           await prisma.candle.update({
             where: { id: velaPendente.id },
-            data: { 
+            data: {
               status: "ATIVA",
               comprador: nomeComprador,
-              transactionId: transactionId
-              // Opcional: atualizar dias/valor caso o que ele pagou na hotmart seja diferente do que clicou, mas vamos manter o da DB.
+              transactionId: transactionId,
+              valor: plan?.valor ?? velaPendente.valor,
+              dias: plan?.dias ?? velaPendente.dias,
+              maxAltura: plan?.maxAltura ?? velaPendente.maxAltura
             }
           });
-          console.log(`Vela ${velaPendente.id} ativada com sucesso! Transação: ${transactionId}`);
+          console.log(`Vela ${velaPendente.id} ativada! Transação: ${transactionId}`);
         } else {
-          // Fallback: se não achar a vela pendente (comprador burlou o sistema ou demorou), cria uma vela simples
+          // Fallback: se não achar a vela pendente (comprador pagou direto pela Hotmart sem
+          // passar pelo site, ou a pendente já expirou/foi consumida), criamos uma vela simples.
           await prisma.candle.create({
             data: {
               nome: nomeComprador,
@@ -100,16 +97,19 @@ export async function POST(req: NextRequest) {
               maxAltura
             }
           });
+          console.log(`Vela fallback criada. Transação: ${transactionId}`);
         }
+      } else {
+        console.warn("Webhook PURCHASE_APPROVED sem compradorEmail — impossível relacionar a vela.");
       }
     } else if (
-      body.event === "PURCHASE_CANCELED" || 
-      body.event === "PURCHASE_REFUNDED" || 
+      body.event === "PURCHASE_CANCELED" ||
+      body.event === "PURCHASE_REFUNDED" ||
       body.event === "PURCHASE_CHARGEBACK" ||
       body.event === "PURCHASE_PROTEST"
     ) {
       const eventData = body.data || body;
-      let rawTransactionId = eventData.purchase?.transaction || eventData.transaction || null;
+      const rawTransactionId = eventData.purchase?.transaction || eventData.transaction || null;
       const transactionId = rawTransactionId ? String(rawTransactionId).substring(0, 255) : null;
 
       if (transactionId) {

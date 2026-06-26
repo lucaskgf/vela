@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { getClientIp } from "@/lib/ip";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -8,8 +9,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = p;
 
     // Proteção Anti-Spam (Máx 5 mensagens por IP por minuto)
-    const ip = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
-    if (!checkRateLimit(ip, "message", 5, 60)) {
+    const ip = getClientIp(req);
+    if (!(await checkRateLimit(ip, "message", 5, 60))) {
       return NextResponse.json({ error: "Muitas mensagens. Aguarde um pouco!" }, { status: 429 });
     }
 

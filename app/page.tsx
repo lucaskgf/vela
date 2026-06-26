@@ -42,22 +42,17 @@ export default function Home() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [activeCandle, setActiveCandle] = useState<Candle | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  
+
   const [toast, setToast] = useState({ show: false, msg: "" });
 
-  const [formValor, setFormValor] = useState(5);
   const [formDias, setFormDias] = useState(30);
-  const [formMethod, setFormMethod] = useState("pix");
-  const [customAmountVisible, setCustomAmountVisible] = useState(false);
-  const [customAmount, setCustomAmount] = useState<number | "">("");
 
   const formNomeRef = useRef<HTMLInputElement>(null);
   const formMsgRef = useRef<HTMLTextAreaElement>(null);
   const formCompradorRef = useRef<HTMLInputElement>(null);
   const formEmailRef = useRef<HTMLInputElement>(null);
 
-  // Stats refs
+  // Stats vindas da rota de agregação (conta/soma sobre TODAS as velas ativas, não só as 150 carregadas).
   const [statCount, setStatCount] = useState(0);
   const [statTotal, setStatTotal] = useState(0);
   const [statLast, setStatLast] = useState("—");
@@ -73,13 +68,20 @@ export default function Home() {
       .catch((err) => {
         console.error(err);
       });
-  }, []);
 
-  useEffect(() => {
-    setStatCount(candles.length);
-    setStatTotal(candles.reduce((acc, c) => acc + c.valor, 0));
-    if (candles.length > 0) setStatLast(candles[0].nome);
-  }, [candles]);
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && typeof data.count === "number") {
+          setStatCount(data.count);
+          setStatTotal(data.total ?? 0);
+          setStatLast(data.last ?? "—");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
 
   const showToast = (msg: string) => {
     setToast({ show: true, msg });
@@ -105,14 +107,10 @@ export default function Home() {
   const openForm = () => {
     setIsFormOpen(true);
     setIsProcessing(false);
-    setIsSuccess(false);
-    setFormValor(5);
     setFormDias(30);
-    setCustomAmountVisible(false);
-    setCustomAmount("");
     setTimeout(() => formNomeRef.current?.focus(), 300);
   };
-  
+
   const closeForm = () => setIsFormOpen(false);
 
   const openDetail = (c: Candle) => {
@@ -121,20 +119,8 @@ export default function Home() {
   };
   const closeDetail = () => setIsDetailOpen(false);
 
-  const handleCandleOptClick = (valor: number, dias: number) => {
-    setFormValor(valor);
+  const handleCandleOptClick = (dias: number) => {
     setFormDias(dias);
-    setCustomAmountVisible(false);
-    setCustomAmount("");
-  };
-
-  const handleCustomInput = (val: string) => {
-    const v = parseFloat(val);
-    setCustomAmount(val === "" ? "" : v);
-    if (!isNaN(v) && v > 0) {
-      setFormValor(v);
-      setFormDias(Math.min(365, Math.max(15, Math.round(v * 18))));
-    }
   };
 
   const submitPurchase = async (e: React.FormEvent) => {
@@ -146,41 +132,35 @@ export default function Home() {
     const email = formEmailRef.current?.value || "";
 
     try {
-      // Salva a vela no banco como PENDENTE
+      // Salva a vela no banco como PENDENTE. O backend valida o plano e retorna o
+      // checkoutUrl da fonte centralizada — assim o cliente nunca mais precisa saber
+      // as URLs da Hotmart (elimina inconsistência checkout↔webhook).
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome, mensagem, comprador, email, dias: formDias }),
       });
       const data = await res.json();
-      
-      if (data.success) {
-        // Redireciona para o checkout da Hotmart correspondente
-        let hotmartUrl = "";
-        if (formDias === 30) {
-          hotmartUrl = "https://pay.hotmart.com/E106403870K";
-        } else if (formDias === 90) {
-          hotmartUrl = "https://pay.hotmart.com/J106475954M";
-        } else {
-          // Fallback para 365 dias ou caso não exista
-          alert("O link para a vela de 365 dias estará disponível em breve!");
-          setIsProcessing(false);
-          return;
-        }
 
+      if (res.ok && data.success && data.checkoutUrl) {
         // Adiciona o email e nome na URL para preencher automaticamente na Hotmart
-        const finalUrl = new URL(hotmartUrl);
+        const finalUrl = new URL(data.checkoutUrl);
         finalUrl.searchParams.append("email", email);
         finalUrl.searchParams.append("name", comprador);
 
         window.location.href = finalUrl.toString();
+      } else if (res.status === 409) {
+        // Plano sem link de checkout ainda (ex: 365 dias) — o backend NÃO criou a vela,
+        // então não há órfão no banco. Avisamos o usuário com clareza.
+        showToast("Este plano ainda não está disponível. Em breve!");
+        setIsProcessing(false);
       } else {
-        alert("Ocorreu um erro ao iniciar o pagamento. Tente novamente.");
+        showToast(data.error || "Ocorreu um erro ao iniciar o pagamento. Tente novamente.");
         setIsProcessing(false);
       }
     } catch (err) {
       console.error(err);
-      alert("Erro ao conectar com o servidor.");
+      showToast("Erro ao conectar com o servidor.");
       setIsProcessing(false);
     }
   };
@@ -412,7 +392,7 @@ export default function Home() {
           <div className="modal">
             <button className="modal-close" onClick={closeForm}>✕</button>
             
-            {isProcessing && !isSuccess && (
+            {isProcessing && (
               <div className="processing">
                 <div className="flame-wrap" style={{ height: 90 }}>
                   <div className="glow"></div>
@@ -425,7 +405,7 @@ export default function Home() {
               </div>
             )}
 
-            {!isProcessing && !isSuccess && (
+            {!isProcessing && (
               <div>
                 <h3>Acenda sua vela</h3>
                 <p className="modal-sub">Uma luz para guardar uma memória, um pedido ou uma gratidão.</p>
@@ -453,7 +433,7 @@ export default function Home() {
                   <div className="field">
                     <label>Tamanho da vela</label>
                     <div className="candle-options">
-                      <button type="button" className={`candle-opt ${formDias === 30 ? "selected" : ""}`} onClick={() => handleCandleOptClick(0, 30)}>
+                      <button type="button" className={`candle-opt ${formDias === 30 ? "selected" : ""}`} onClick={() => handleCandleOptClick(30)}>
                         <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                           <div className="flame-wrap" style={{ transform: "scale(0.7)", transformOrigin: "bottom center", pointerEvents: "none" }}>
                             <div className="glow"></div><div className="flame"></div><div className="wick"></div>
@@ -462,7 +442,7 @@ export default function Home() {
                         </div>
                         <span className="days">30 dias</span>
                       </button>
-                      <button type="button" className={`candle-opt ${formDias === 90 ? "selected" : ""}`} onClick={() => handleCandleOptClick(0, 90)}>
+                      <button type="button" className={`candle-opt ${formDias === 90 ? "selected" : ""}`} onClick={() => handleCandleOptClick(90)}>
                         <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                           <div className="flame-wrap" style={{ transform: "scale(0.85)", transformOrigin: "bottom center", pointerEvents: "none" }}>
                             <div className="glow"></div><div className="flame"></div><div className="wick"></div>
@@ -471,14 +451,14 @@ export default function Home() {
                         </div>
                         <span className="days">90 dias</span>
                       </button>
-                      <button type="button" className={`candle-opt ${formDias === 365 ? "selected" : ""}`} onClick={() => handleCandleOptClick(0, 365)}>
+                      <button type="button" className="candle-opt candle-opt-disabled" disabled title="Disponível em breve" onClick={() => showToast("A vela de 365 dias estará disponível em breve!")}>
                         <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-                          <div className="flame-wrap" style={{ transform: "scale(1)", transformOrigin: "bottom center", pointerEvents: "none" }}>
+                          <div className="flame-wrap" style={{ transform: "scale(1)", transformOrigin: "bottom center", pointerEvents: "none", opacity: 0.4 }}>
                             <div className="glow"></div><div className="flame"></div><div className="wick"></div>
                             <div className="wax" style={{ height: 54 }}></div>
                           </div>
                         </div>
-                        <span className="days">365 dias</span>
+                        <span className="days">365 dias · em breve</span>
                       </button>
                     </div>
                   </div>

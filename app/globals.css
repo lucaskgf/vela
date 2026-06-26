@@ -472,6 +472,8 @@ header{
 .candle-opt .price{font-family:var(--serif);color:var(--white);font-size:1rem;}
 .candle-opt .days{font-size:.7rem;color:var(--ash);}
 .candle-opt.selected{border-color:var(--gold);background:rgba(212,175,55,0.08);box-shadow:0 0 18px rgba(212,175,55,0.15);}
+.candle-opt.candle-opt-disabled{opacity:.55;cursor:not-allowed;border-style:dashed;}
+.candle-opt.candle-opt-disabled:hover{border-color:var(--line);background:rgba(255,255,255,0.02);}
 .custom-amount{display:none;margin-top:.7rem;}
 .custom-amount.show{display:block;}
 .pay-methods{display:flex;gap:.7rem;margin-bottom:1.6rem;flex-wrap:wrap;}

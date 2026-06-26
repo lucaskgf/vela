@@ -15,8 +15,13 @@ const nextConfig: NextConfig = {
             value: "nosniff",
           },
           {
+            // CSP endurecida: removemos 'unsafe-eval' do script-src (XSS surface grande).
+            // 'unsafe-inline' permanece em style-src por causa dos blocos <style> inline
+            // do memorial/noche-de-oracion; em script-src usamos apenas 'self'.
+            // Nota: se no futuro houver erros de CSP em produção (ex: eval de alguma lib),
+            // reintroduza o nonce via headers() em vez de voltar para 'unsafe-eval'.
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com;",
+            value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; media-src 'self';",
           },
           {
             key: "Referrer-Policy",
