@@ -25,6 +25,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Erro ao buscar stats:", error);
-    return NextResponse.json({ error: "Erro ao carregar estatísticas" }, { status: 500 });
+    return NextResponse.json({ error: "Error al cargar las estadísticas" }, { status: 500 });
   }
 }

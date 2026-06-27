@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Proteção Anti-Spam (Máx 5 mensagens por IP por minuto)
     const ip = getClientIp(req);
     if (!(await checkRateLimit(ip, "message", 5, 60))) {
-      return NextResponse.json({ error: "Muitas mensagens. Aguarde um pouco!" }, { status: 429 });
+      return NextResponse.json({ error: "Demasiados mensajes. ¡Espera un poco!" }, { status: 429 });
     }
 
     const body = await req.json();
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     mensagem = String(mensagem || "").substring(0, 500);
 
     if (!nome || !mensagem) {
-      return NextResponse.json({ error: "Nome e mensagem são obrigatórios" }, { status: 400 });
+      return NextResponse.json({ error: "El nombre y el mensaje son obligatorios" }, { status: 400 });
     }
 
     const newMessage = await prisma.supportMessage.create({
@@ -36,6 +36,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: true, message: newMessage });
   } catch (error) {
     console.error("Erro ao enviar mensagem:", error);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

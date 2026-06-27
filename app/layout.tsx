@@ -15,11 +15,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "La Voz de la Cruz — Acenda uma luz de fé",
-  description: "La Voz de la Cruz é um memorial digital de fé. Acenda uma vela virtual em homenagem a quem você ama e veja sua luz brilhar no Mural da Fé.",
+  title: "La Voz de la Cruz — Enciende una luz de fe",
+  description: "La Voz de la Cruz es un memorial digital de fe. Enciende una vela virtual en homenaje a quien amas y ve su luz brillar en el Mural de la Fe.",
   openGraph: {
     title: "La Voz de la Cruz",
-    description: "Acenda uma luz de fé para quem você ama.",
+    description: "Enciende una luz de fe para quien amas.",
   }
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="es">
       <body className={`${cinzel.variable} ${inter.variable}`}>
         {children}
       </body>

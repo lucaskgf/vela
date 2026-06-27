@@ -37,7 +37,7 @@ function alturaAtual(criadoEm: string, dias: number, maxAltura: number) {
 }
 
 function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+  return new Date(d).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" });
 }
 
 export default function VelaMemorialPage({ params }: { params: Promise<{ id: string }> }) {
@@ -116,11 +116,11 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
         setMensagens([data.message, ...mensagens]);
         setNomeMsg("");
         setTextoMsg("");
-        showToast("Mensagem enviada com amor ❤️");
+        showToast("Mensaje enviado con amor ❤️");
       }
     } catch (err) {
       console.error(err);
-      alert("Erro ao enviar mensagem.");
+      alert("Error al enviar el mensaje.");
     } finally {
       setSendingMsg(false);
     }
@@ -129,7 +129,7 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ color: "var(--ash)" }}>Buscando a luz desta vela...</p>
+        <p style={{ color: "var(--ash)" }}>Buscando la luz de esta vela...</p>
       </div>
     );
   }
@@ -143,7 +143,7 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
     <>
       <header style={{ borderBottom: "1px solid var(--line)", background: "rgba(0,0,0,0.5)", padding: "1rem" }}>
         <div className="container" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <Link href="/#mural" className="btn btn-ghost" style={{ padding: "0.5rem 1rem" }}>← Voltar ao Mural</Link>
+          <Link href="/#mural" className="btn btn-ghost" style={{ padding: "0.5rem 1rem" }}>← Volver al Mural</Link>
           <div className="logo" style={{ marginLeft: "auto" }}>
             <span className="mark"></span> La Voz de la Cruz
           </div>
@@ -166,8 +166,8 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
                 <div className="wax" style={{ height: `${currentHeight}px`, width: 28 }}></div>
               </div>
               <div className="share-row" style={{ justifyContent: "center", marginTop: "4rem" }}>
-                <a className="share-btn" href={`https://wa.me/?text=${encodeURIComponent(`Acendi uma vela em homenagem a ${candle.nome} no La Voz de la Cruz. Visite o memorial: ${window.location.href}`)}`} target="_blank" rel="noopener noreferrer">Compartilhar no WhatsApp</a>
-                <button className="share-btn" onClick={() => { navigator.clipboard?.writeText(window.location.href); showToast("Link copiado!"); }}>Copiar Link</button>
+                <a className="share-btn" href={`https://wa.me/?text=${encodeURIComponent(`Encendí una vela en homenaje a ${candle.nome} en La Voz de la Cruz. Visita el memorial: ${window.location.href}`)}`} target="_blank" rel="noopener noreferrer">Compartir en WhatsApp</a>
+                <button className="share-btn" onClick={() => { navigator.clipboard?.writeText(window.location.href); showToast("¡Link copiado!"); }}>Copiar Link</button>
               </div>
             </div>
 
@@ -195,9 +195,9 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
               <p className="eyebrow" style={{ color: "var(--gold)" }}>Memorial Digital</p>
               <h1 style={{ fontSize: "2.4rem", marginBottom: "0.5rem", color: "var(--white)", wordBreak: "break-word", overflowWrap: "break-word" }}>{candle.nome}</h1>
               <div style={{ display: "flex", gap: "1rem", color: "var(--ash)", fontSize: "0.9rem", flexWrap: "wrap", marginBottom: "2rem" }}>
-                <span>Acesa em {formatDate(candle.criadoEm)}</span>
+                <span>Encendida el {formatDate(candle.criadoEm)}</span>
                 <span>•</span>
-                <span>{diasRestantes(candle.criadoEm, candle.dias)} dias restantes</span>
+                <span>{diasRestantes(candle.criadoEm, candle.dias)} días restantes</span>
                 <span>•</span>
                 <span>Por {candle.comprador}</span>
               </div>
@@ -212,23 +212,23 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
             )}
 
             <div className="support-board">
-              <h3 style={{ fontSize: "1.4rem", marginBottom: "1.5rem", borderBottom: "1px solid var(--line)", paddingBottom: "0.8rem" }}>Deixe uma mensagem de apoio</h3>
-              
+              <h3 style={{ fontSize: "1.4rem", marginBottom: "1.5rem", borderBottom: "1px solid var(--line)", paddingBottom: "0.8rem" }}>Deja un mensaje de apoyo</h3>
+
               <form onSubmit={submitMessage} className="support-form" style={{ marginBottom: "2.5rem", background: "rgba(255,255,255,0.02)", padding: "1.5rem", borderRadius: "12px", border: "1px solid var(--line)" }}>
                 <div className="field">
-                  <input type="text" placeholder="Seu nome" value={nomeMsg} onChange={e => setNomeMsg(e.target.value)} required />
+                  <input type="text" placeholder="Tu nombre" value={nomeMsg} onChange={e => setNomeMsg(e.target.value)} required />
                 </div>
                 <div className="field">
-                  <textarea placeholder="Escreva uma palavra de conforto..." value={textoMsg} onChange={e => setTextoMsg(e.target.value)} required style={{ minHeight: "80px" }}></textarea>
+                  <textarea placeholder="Escribe una palabra de consuelo..." value={textoMsg} onChange={e => setTextoMsg(e.target.value)} required style={{ minHeight: "80px" }}></textarea>
                 </div>
                 <button type="submit" className="btn btn-solid" disabled={sendingMsg}>
-                  {sendingMsg ? "Enviando..." : "Enviar Mensagem"}
+                  {sendingMsg ? "Enviando..." : "Enviar Mensaje"}
                 </button>
               </form>
 
               <div className="messages-list" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 {mensagens.length === 0 ? (
-                  <p style={{ color: "var(--ash)", fontStyle: "italic" }}>Nenhuma mensagem ainda. Seja o primeiro a deixar uma palavra de apoio.</p>
+                  <p style={{ color: "var(--ash)", fontStyle: "italic" }}>Todavía no hay mensajes. Sé el primero en dejar una palabra de apoyo.</p>
                 ) : (
                   mensagens.map(msg => (
                     <div key={msg.id} className="message-card" style={{ padding: "1.2rem", border: "1px solid var(--line)", borderRadius: "12px", background: "rgba(0,0,0,0.2)" }}>

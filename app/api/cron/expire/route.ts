@@ -72,6 +72,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, expired: result.count });
   } catch (error) {
     console.error("[cron/expire] erro:", error);
-    return NextResponse.json({ error: "Erro ao expirar velas" }, { status: 500 });
+    return NextResponse.json({ error: "Error al expirar las velas" }, { status: 500 });
   }
 }

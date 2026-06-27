@@ -34,7 +34,7 @@ export async function GET() {
   } catch (error) {
     console.error("Erro ao buscar velas:", error);
     return NextResponse.json(
-      { error: "Erro ao carregar o mural" },
+      { error: "Error al cargar el mural" },
       { status: 500 }
     );
   }

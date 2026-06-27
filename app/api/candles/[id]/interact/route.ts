@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Proteção Anti-Spam (Máx 60 cliques por IP por minuto)
     const ip = getClientIp(req);
     if (!(await checkRateLimit(ip, "interact", 60, 60))) {
-      return NextResponse.json({ error: "Muitas interações. Vá com calma!" }, { status: 429 });
+      return NextResponse.json({ error: "Demasiadas interacciones. ¡Ve con calma!" }, { status: 429 });
     }
 
     const body = await req.json();
@@ -33,6 +33,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: true, count: updated[incrementField as keyof typeof updated] });
   } catch (error) {
     console.error("Erro ao interagir com vela:", error);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

@@ -31,12 +31,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     });
 
     if (!candle) {
-      return NextResponse.json({ error: "Vela não encontrada" }, { status: 404 });
+      return NextResponse.json({ error: "Vela no encontrada" }, { status: 404 });
     }
 
     return NextResponse.json(candle);
   } catch (error) {
     console.error("Erro ao buscar vela:", error);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     // Proteção Anti-Spam de Checkout (Máx 5 por IP por minuto)
     const ip = getClientIp(req);
     if (!(await checkRateLimit(ip, "checkout", 5, 60))) {
-      return NextResponse.json({ error: "Muitas tentativas. Aguarde um pouco!" }, { status: 429 });
+      return NextResponse.json({ error: "Demasiados intentos. ¡Espera un poco!" }, { status: 429 });
     }
 
     const body = await req.json();
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     // Validação centralizada do plano — rejeita dias inválidos ANTES de tocar no banco.
     const diasNum = Number(dias);
     if (!isValidDias(diasNum)) {
-      return NextResponse.json({ error: "Plano inválido" }, { status: 400 });
+      return NextResponse.json({ error: "Plan inválido" }, { status: 400 });
     }
     const plan = PLANS[diasNum];
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     // deixando centenas de velas órfãs no banco. Agora bloqueamos cedo.
     if (!plan.checkoutUrl) {
       return NextResponse.json(
-        { error: "Este plano ainda não está disponível para compra. Em breve!" },
+        { error: "Este plan aún no está disponible para la compra. ¡Pronto!" },
         { status: 409 }
       );
     }
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     console.error("Erro ao gerar checkout:", error);
     return NextResponse.json(
-      { error: "Erro ao iniciar checkout" },
+      { error: "Error al iniciar el checkout" },
       { status: 500 }
     );
   }

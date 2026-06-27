@@ -29,7 +29,7 @@ function alturaAtual(c: Candle) {
 }
 
 function formatDate(d: Date) {
-  return new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+  return new Date(d).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" });
 }
 
 export default function Home() {
@@ -52,7 +52,7 @@ export default function Home() {
   const formCompradorRef = useRef<HTMLInputElement>(null);
   const formEmailRef = useRef<HTMLInputElement>(null);
 
-  // Stats vindas da rota de agregação (conta/soma sobre TODAS as velas ativas, não só as 150 carregadas).
+  // Stats: provienen de la ruta de agregación (cuenta/suma sobre TODAS las velas activas, no solo las 150 cargadas).
   const [statCount, setStatCount] = useState(0);
   const [statTotal, setStatTotal] = useState(0);
   const [statLast, setStatLast] = useState("—");
@@ -132,9 +132,9 @@ export default function Home() {
     const email = formEmailRef.current?.value || "";
 
     try {
-      // Salva a vela no banco como PENDENTE. O backend valida o plano e retorna o
-      // checkoutUrl da fonte centralizada — assim o cliente nunca mais precisa saber
-      // as URLs da Hotmart (elimina inconsistência checkout↔webhook).
+      // Guarda la vela en la base de datos como PENDIENTE. El backend valida el plan y devuelve
+      // el checkoutUrl desde la fuente centralizada — así el cliente nunca necesita conocer las
+      // URLs de Hotmart (elimina inconsistencia checkout↔webhook).
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -143,24 +143,24 @@ export default function Home() {
       const data = await res.json();
 
       if (res.ok && data.success && data.checkoutUrl) {
-        // Adiciona o email e nome na URL para preencher automaticamente na Hotmart
+        // Agrega email y nombre en la URL para autocompletar en Hotmart
         const finalUrl = new URL(data.checkoutUrl);
         finalUrl.searchParams.append("email", email);
         finalUrl.searchParams.append("name", comprador);
 
         window.location.href = finalUrl.toString();
       } else if (res.status === 409) {
-        // Plano sem link de checkout ainda (ex: 365 dias) — o backend NÃO criou a vela,
-        // então não há órfão no banco. Avisamos o usuário com clareza.
-        showToast("Este plano ainda não está disponível. Em breve!");
+        // Plan sin link de checkout todavía (ej: 365 días) — el backend NO creó la vela,
+        // así que no hay huérfana en la base. Avisamos al usuario con claridad.
+        showToast("Este plan aún no está disponible. ¡Pronto!");
         setIsProcessing(false);
       } else {
-        showToast(data.error || "Ocorreu um erro ao iniciar o pagamento. Tente novamente.");
+        showToast(data.error || "Ocurrió un error al iniciar el pago. Inténtalo de nuevo.");
         setIsProcessing(false);
       }
     } catch (err) {
       console.error(err);
-      showToast("Erro ao conectar com o servidor.");
+      showToast("Error al conectar con el servidor.");
       setIsProcessing(false);
     }
   };
@@ -199,12 +199,12 @@ export default function Home() {
           </a>
           <div className="navlinks">
             <a href="#mural">Mural</a>
-            <a href="#sobre">Sobre</a>
-            <a href="#contagem">Como funciona</a>
+            <a href="#sobre">Nosotros</a>
+            <a href="#contagem">Cómo funciona</a>
           </div>
           <div className="nav-cta">
             <a href="#mural" className="btn btn-ghost">Ver Mural</a>
-            <button className="btn btn-solid" onClick={openForm}>Acender uma Vela</button>
+            <button className="btn btn-solid" onClick={openForm}>Encender una Vela</button>
           </div>
         </nav>
       </header>
@@ -224,11 +224,11 @@ export default function Home() {
               <rect x="10" y="30" width="64" height="10" rx="3" fill="url(#crossGrad)" />
             </svg>
           </div>
-          <p className="eyebrow hero-eyebrow">Um memorial digital de fé</p>
-          <h1>Acenda uma luz de fé para <em>quem você ama</em></h1>
-          <p className="sub">Cada vela representa uma oração, uma lembrança e uma homenagem eterna.</p>
+          <p className="eyebrow hero-eyebrow">Un memorial digital de fe</p>
+          <h1>Enciende una luz de fe para <em>quien amas</em></h1>
+          <p className="sub">Cada vela representa una oración, un recuerdo y un homenaje eterno.</p>
           <div className="hero-actions">
-            <button className="btn btn-solid btn-lg" onClick={openForm}>Acender uma Vela</button>
+            <button className="btn btn-solid btn-lg" onClick={openForm}>Encender una Vela</button>
             <a href="#mural" className="btn btn-ghost btn-lg">Ver Mural de Velas</a>
           </div>
         </section>
@@ -237,15 +237,15 @@ export default function Home() {
           <div className="stats-inner">
             <div className="stat">
               <span className="num">{statCount}</span>
-              <span className="label">Velas acesas</span>
+              <span className="label">Velas encendidas</span>
             </div>
             <div className="stat">
-              <span className="num">R$ {statTotal.toLocaleString("pt-BR")}</span>
-              <span className="label">Arrecadado em homenagens</span>
+              <span className="num">R$ {statTotal.toLocaleString("es-ES")}</span>
+              <span className="label">Recaudado en homenajes</span>
             </div>
             <div className="stat">
               <span className="num">{statLast}</span>
-              <span className="label">Última homenagem</span>
+              <span className="label">Último homenaje</span>
             </div>
           </div>
         </section>
@@ -254,9 +254,9 @@ export default function Home() {
           <div className="container">
             <div className="section-head">
               <div className="divider-flame"></div>
-              <p className="eyebrow">O Mural da Fé</p>
-              <h2>Cada luz, uma história</h2>
-              <p>Centenas de velas acesas por quem buscou conforto, gratidão e esperança. Toque em uma vela para ler a homenagem completa.</p>
+              <p className="eyebrow">El Mural de la Fe</p>
+              <h2>Cada luz, una historia</h2>
+              <p>Cientos de velas encendidas por quienes buscaron consuelo, gratitud y esperanza. Toca una vela para leer el homenaje completo.</p>
             </div>
 
             <div className="mural-toolbar">
@@ -267,16 +267,16 @@ export default function Home() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Buscar por nome..."
+                  placeholder="Buscar por nombre..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <div className="filters">
-                <button className={`chip ${activeFilter === "all" ? "active" : ""}`} onClick={() => setActiveFilter("all")}>Todas as datas</button>
-                <button className={`chip ${activeFilter === "today" ? "active" : ""}`} onClick={() => setActiveFilter("today")}>Hoje</button>
+                <button className={`chip ${activeFilter === "all" ? "active" : ""}`} onClick={() => setActiveFilter("all")}>Todas las fechas</button>
+                <button className={`chip ${activeFilter === "today" ? "active" : ""}`} onClick={() => setActiveFilter("today")}>Hoy</button>
                 <button className={`chip ${activeFilter === "week" ? "active" : ""}`} onClick={() => setActiveFilter("week")}>Esta semana</button>
-                <button className={`chip ${activeFilter === "month" ? "active" : ""}`} onClick={() => setActiveFilter("month")}>Este mês</button>
+                <button className={`chip ${activeFilter === "month" ? "active" : ""}`} onClick={() => setActiveFilter("month")}>Este mes</button>
               </div>
             </div>
 
@@ -295,18 +295,18 @@ export default function Home() {
                       <div className="wax" style={{ height: `${alturaAtual(c)}px` }}></div>
                     </div>
                     <span className="candle-name">{c.nome}</span>
-                    <span className="candle-days">{diasRestantes(c)} dias restantes</span>
+                    <span className="candle-days">{diasRestantes(c)} días restantes</span>
                   </button>
                 ))}
               </div>
               {filteredCandles.length === 0 && (
-                <p className="mural-empty">Nenhuma vela encontrada com esse nome ou período.</p>
+                <p className="mural-empty">No se encontró ninguna vela con ese nombre o período.</p>
               )}
             </div>
 
             {filteredCandles.length > visibleCount && (
               <div className="mural-more">
-                <button className="btn btn-ghost" onClick={() => setVisibleCount((v) => v + 12)}>Ver mais velas</button>
+                <button className="btn btn-ghost" onClick={() => setVisibleCount((v) => v + 12)}>Ver más velas</button>
               </div>
             )}
           </div>
@@ -316,9 +316,9 @@ export default function Home() {
           <div className="container">
             <div className="section-head">
               <div className="divider-flame"></div>
-              <p className="eyebrow">Como funciona</p>
-              <h2>O tamanho da vela define o tempo da luz</h2>
-              <p>Cada homenagem escolhe quanto tempo a chama permanecerá acesa no mural — assim como uma vela real, ela arde aos poucos até se apagar.</p>
+              <p className="eyebrow">Cómo funciona</p>
+              <h2>El tamaño de la vela define el tiempo de la luz</h2>
+              <p>Cada homenaje elige cuánto tiempo permanecerá encendida la llama en el mural — al igual que una vela real, se consume poco a poco hasta apagarse.</p>
             </div>
             <div className="candle-options" style={{ maxWidth: 680, margin: "0 auto" }}>
               <div className="candle-opt">
@@ -328,7 +328,7 @@ export default function Home() {
                     <div className="wax" style={{ height: 26 }}></div>
                   </div>
                 </div>
-                <span className="days">30 dias acesa</span>
+                <span className="days">30 días encendida</span>
               </div>
               <div className="candle-opt">
                 <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
@@ -337,7 +337,7 @@ export default function Home() {
                     <div className="wax" style={{ height: 40 }}></div>
                   </div>
                 </div>
-                <span className="days">90 dias acesa</span>
+                <span className="days">90 días encendida</span>
               </div>
               <div className="candle-opt">
                 <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
@@ -346,7 +346,7 @@ export default function Home() {
                     <div className="wax" style={{ height: 54 }}></div>
                   </div>
                 </div>
-                <span className="days">365 dias acesa</span>
+                <span className="days">365 días encendida</span>
               </div>
             </div>
           </div>
@@ -364,11 +364,11 @@ export default function Home() {
               </div>
             </div>
             <div className="about-text">
-              <p className="eyebrow">Sobre o projeto</p>
-              <h2>Um espaço para a luz que a distância não alcança</h2>
-              <p>La Voz de la Cruz nasceu como uma extensão do nosso canal de fé — um lugar para transformar oração em algo visível. Aqui, cada vela acesa carrega um nome, uma saudade, um pedido ou um agradecimento.</p>
-              <p className="quote">"A luz física nem sempre alcança quem amamos. A luz digital pode atravessar qualquer distância e continuar ardendo por eles."</p>
-              <p>Acreditamos que homenagear é um ato de fé contínuo. Por isso, cada vela permanece acesa pelo tempo escolhido — mantendo viva a memória de quem ela representa.</p>
+              <p className="eyebrow">Sobre el proyecto</p>
+              <h2>Un espacio para la luz que la distancia no alcanza</h2>
+              <p>La Voz de la Cruz nació como una extensión de nuestro canal de fe — un lugar para transformar la oración en algo visible. Aquí, cada vela encendida lleva un nombre, una nostalgia, un pedido o un agradecimiento.</p>
+              <p className="quote">"La luz física no siempre alcanza a quienes amamos. La luz digital puede atravesar cualquier distancia y seguir ardiendo por ellos."</p>
+              <p>Creemos que homenajear es un acto de fe continuo. Por eso, cada vela permanece encendida por el tiempo elegido — manteniendo viva la memoria de quien representa.</p>
             </div>
           </div>
         </section>
@@ -378,11 +378,11 @@ export default function Home() {
         <div className="container footer-inner">
           <a href="#top" className="logo"><span className="mark" aria-hidden="true"></span>La Voz de la Cruz</a>
           <div className="footer-links">
-            <a href="#top">Início</a>
+            <a href="#top">Inicio</a>
             <a href="#mural">Mural</a>
-            <a href="#sobre">Sobre</a>
+            <a href="#sobre">Nosotros</a>
           </div>
-          <p className="footer-credit">Feito com fé. © 2026 La Voz de la Cruz.</p>
+          <p className="footer-credit">Hecho con fe. © 2026 La Voz de la Cruz.</p>
         </div>
       </footer>
 
@@ -400,38 +400,38 @@ export default function Home() {
                   <div className="wick"></div>
                   <div className="wax" style={{ height: 50, width: 30 }}></div>
                 </div>
-                <h3 style={{ fontSize: "1.15rem" }}>Preparando Checkout...</h3>
-                <p style={{ color: "var(--ash)", fontSize: ".88rem" }}>Redirecionando para pagamento seguro. Isso leva apenas alguns segundos.</p>
+                <h3 style={{ fontSize: "1.15rem" }}>Preparando el pago...</h3>
+                <p style={{ color: "var(--ash)", fontSize: ".88rem" }}>Redirigiendo a un pago seguro. Esto tarda solo unos segundos.</p>
               </div>
             )}
 
             {!isProcessing && (
               <div>
-                <h3>Acenda sua vela</h3>
-                <p className="modal-sub">Uma luz para guardar uma memória, um pedido ou uma gratidão.</p>
+                <h3>Enciende tu vela</h3>
+                <p className="modal-sub">Una luz para guardar un recuerdo, un pedido o un agradecimiento.</p>
 
                 <form onSubmit={submitPurchase}>
                   <div className="field">
-                    <label>Para quem é esta vela?</label>
-                    <input type="text" ref={formNomeRef} placeholder="Nome da pessoa homenageada" required />
+                    <label>¿Para quién es esta vela?</label>
+                    <input type="text" ref={formNomeRef} placeholder="Nombre de la persona homenajeada" required />
                   </div>
                   <div className="field">
-                    <label>Mensagem (opcional)</label>
-                    <textarea ref={formMsgRef} placeholder="Escreva uma oração, lembrança ou agradecimento..."></textarea>
+                    <label>Mensaje (opcional)</label>
+                    <textarea ref={formMsgRef} placeholder="Escribe una oración, recuerdo o agradecimiento..."></textarea>
                   </div>
                   <div className="field-row">
                     <div className="field">
-                      <label>Seu nome</label>
-                      <input type="text" ref={formCompradorRef} placeholder="Quem está acendendo" required />
+                      <label>Tu nombre</label>
+                      <input type="text" ref={formCompradorRef} placeholder="Quién la enciende" required />
                     </div>
                     <div className="field">
-                      <label>E-mail (para receber o recibo da Hotmart)</label>
-                      <input type="email" ref={formEmailRef} placeholder="seu@email.com" required />
+                      <label>Correo electrónico (para recibir el recibo de Hotmart)</label>
+                      <input type="email" ref={formEmailRef} placeholder="tu@email.com" required />
                     </div>
                   </div>
 
                   <div className="field">
-                    <label>Tamanho da vela</label>
+                    <label>Tamaño de la vela</label>
                     <div className="candle-options">
                       <button type="button" className={`candle-opt ${formDias === 30 ? "selected" : ""}`} onClick={() => handleCandleOptClick(30)}>
                         <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
@@ -451,20 +451,20 @@ export default function Home() {
                         </div>
                         <span className="days">90 dias</span>
                       </button>
-                      <button type="button" className="candle-opt candle-opt-disabled" disabled title="Disponível em breve" onClick={() => showToast("A vela de 365 dias estará disponível em breve!")}>
+                      <button type="button" className="candle-opt candle-opt-disabled" disabled title="Disponible pronto" onClick={() => showToast("¡La vela de 365 días estará disponible pronto!")}>
                         <div style={{ height: 80, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                           <div className="flame-wrap" style={{ transform: "scale(1)", transformOrigin: "bottom center", pointerEvents: "none", opacity: 0.4 }}>
                             <div className="glow"></div><div className="flame"></div><div className="wick"></div>
                             <div className="wax" style={{ height: 54 }}></div>
                           </div>
                         </div>
-                        <span className="days">365 dias · em breve</span>
+                        <span className="days">365 días · pronto</span>
                       </button>
                     </div>
                   </div>
 
                   <button type="submit" className="btn btn-solid btn-lg btn-block" style={{ marginTop: "1rem" }}>
-                    Finalizar na Hotmart (Seguro)
+                    Finalizar en Hotmart (Seguro)
                   </button>
                 </form>
               </div>
@@ -489,10 +489,10 @@ export default function Home() {
               <div className="wax" style={{ height: `${alturaAtual(activeCandle)}px`, width: 30 }}></div>
             </div>
             <h3 className="detail-name">{activeCandle.nome}</h3>
-            <p className="detail-date">Acesa em {formatDate(activeCandle.criadoEm)} · {diasRestantes(activeCandle)} dias restantes</p>
-            <p className="detail-msg">{activeCandle.mensagem || "Uma luz acesa em silêncio, com fé e gratidão."}</p>
-            <p className="detail-buyer">Homenagem de: {activeCandle.comprador}</p>
-            
+            <p className="detail-date">Encendida el {formatDate(activeCandle.criadoEm)} · {diasRestantes(activeCandle)} días restantes</p>
+            <p className="detail-msg">{activeCandle.mensagem || "Una luz encendida en silencio, con fe y gratitud."}</p>
+            <p className="detail-buyer">Homenaje de: {activeCandle.comprador}</p>
+
             <Link href={`/vela/${activeCandle.id}`} className="btn btn-solid btn-block" style={{ marginTop: "1rem", textAlign: "center", textDecoration: "none" }}>
               Ver Memorial Completo
             </Link>

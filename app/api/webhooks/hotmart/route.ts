@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Erro no Webhook da Hotmart:", error);
     return NextResponse.json(
-      { error: "Erro ao processar webhook" },
+      { error: "Error al procesar el webhook" },
       { status: 500 }
     );
   }

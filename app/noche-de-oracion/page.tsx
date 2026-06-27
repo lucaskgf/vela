@@ -14,8 +14,8 @@ type Candle = {
   criadoEm: string;
 };
 
-// O áudio agora será lido do seu próprio servidor para evitar bloqueios ou erro de formato no Safari/iOS.
-// Para colocar a música definitiva, salve um arquivo MP3 chamado "ambient.mp3" dentro da pasta "public" do projeto.
+// El audio ahora se lee desde tu propio servidor para evitar bloqueos o error de formato en Safari/iOS.
+// Para poner la música definitiva, guarda un archivo MP3 llamado "ambient.mp3" dentro de la carpeta "public" del proyecto.
 const AUDIO_URL = "/ambient.mp3";
 
 function diasRestantes(criadoEm: string, dias: number) {
@@ -35,7 +35,7 @@ export default function NocheDeOracionPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Viewer simulation (14 to 148)
+  // Simulación de espectadores (14 a 148)
   useEffect(() => {
     setViewers(Math.floor(Math.random() * (148 - 14 + 1)) + 14);
     
@@ -52,14 +52,14 @@ export default function NocheDeOracionPage() {
     return () => clearInterval(viewerInterval);
   }, []);
 
-  // Fetch candles & poll
+  // Cargar velas y hacer polling
   useEffect(() => {
     const fetchCandles = () => {
       fetch("/api/candles")
         .then(r => r.json())
         .then(data => {
           if (Array.isArray(data)) {
-            // Apenas velas não expiradas
+            // Solo velas no expiradas
             const active = data.filter(c => diasRestantes(c.criadoEm, c.dias) > 0);
             setCandles(active);
           }
@@ -72,7 +72,7 @@ export default function NocheDeOracionPage() {
     return () => clearInterval(pollInterval);
   }, []);
 
-  // Audio handling
+  // Manejo de audio
   const toggleAudio = () => {
     if (audioRef.current) {
       if (isMuted) {
@@ -84,11 +84,11 @@ export default function NocheDeOracionPage() {
     }
   };
 
-  // Fullscreen handling
+  // Manejo de pantalla completa
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        console.error(`Error al intentar activar pantalla completa: ${err.message}`);
       });
     } else {
       if (document.exitFullscreen) {
@@ -105,8 +105,8 @@ export default function NocheDeOracionPage() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // Gerar posições fixas para as velas baseadas em percentual
-  // Como elas usam porcentagem e estão dentro da prayer-wall-container, elas se ajustam automaticamente no resize.
+  // Generar posiciones fijas para las velas basadas en porcentaje
+  // Como usan porcentaje y están dentro de prayer-wall-container, se ajustan automáticamente al redimensionar.
   const [candlePositions, setCandlePositions] = useState<{ [id: string]: { left: number, top: number, scale: number, zIndex: number } }>({});
   
   useEffect(() => {
@@ -128,7 +128,7 @@ export default function NocheDeOracionPage() {
     });
   }, [candles]);
 
-  // Fundo com Bokeh Lights
+  // Fondo con luces Bokeh
   const [bokehs, setBokehs] = useState<{ id: number, left: number, top: number, size: number, delay: number, duration: number }[]>([]);
   useEffect(() => {
     const b = Array.from({ length: 150 }).map((_, i) => ({
@@ -146,22 +146,22 @@ export default function NocheDeOracionPage() {
     <div className={`noche-wrapper ${isFullscreen ? 'is-fullscreen' : ''}`}>
       <audio ref={audioRef} src={AUDIO_URL} loop />
       
-      {/* Background Ambience isolado do fluxo flex */}
+      {/* Ambiente de fondo aislado del flujo flex */}
       <div className="noche-bg"></div>
 
-      {/* HEADER: Botão voltar e Pessoas Online */}
+      {/* ENCABEZADO: Botón volver y Personas conectadas */}
       <header className="noche-header">
-        <Link href="/#mural" className="btn btn-ghost" style={{ padding: "0.5rem 1rem", border: "1px solid rgba(255,255,255,0.2)" }}>← Voltar</Link>
+        <Link href="/#mural" className="btn btn-ghost" style={{ padding: "0.5rem 1rem", border: "1px solid rgba(255,255,255,0.2)" }}>← Volver</Link>
         <div className="viewers">
           <span className="live-dot"></span>
-          {viewers} em oração
+          {viewers} en oración
         </div>
       </header>
 
-      {/* MIDDLE: Prayer Wall Container (Área Segura e Restrita) */}
+      {/* CENTRO: Prayer Wall Container (Área segura y restringida) */}
       <main className="prayer-wall-container">
-        
-        {/* Distant Lights (Bokeh) */}
+
+        {/* Luces lejanas (Bokeh) */}
         <div className="bokeh-container">
           {bokehs.map(b => (
             <div 
@@ -179,7 +179,7 @@ export default function NocheDeOracionPage() {
           ))}
         </div>
 
-        {/* Real Candles (Foreground) */}
+        {/* Velas reales (primer plano) */}
         <div className="candles-container">
           {candles.map(c => {
             const pos = candlePositions[c.id];
@@ -210,18 +210,18 @@ export default function NocheDeOracionPage() {
         </div>
       </main>
 
-      {/* FOOTER: Logo e Controles (Áudio/Fullscreen) */}
+      {/* PIE: Logo y Controles (Audio/Pantalla completa) */}
       <footer className="noche-footer">
         <div className="footer-left">
           <div className="logo"><span className="mark"></span> La Voz de la Cruz</div>
           <p>Memorial Digital - Noche de Oración</p>
         </div>
-        
+
         <div className="noche-controls">
-          <button onClick={toggleAudio} className="ctrl-btn" title={isMuted ? "Ligar Áudio" : "Desligar Áudio"}>
+          <button onClick={toggleAudio} className="ctrl-btn" title={isMuted ? "Activar Audio" : "Desactivar Audio"}>
             {isMuted ? "🔇" : "🔊"}
           </button>
-          <button onClick={toggleFullscreen} className="ctrl-btn" title="Tela Cheia">
+          <button onClick={toggleFullscreen} className="ctrl-btn" title="Pantalla completa">
             ⛶
           </button>
         </div>
@@ -246,7 +246,7 @@ export default function NocheDeOracionPage() {
           pointer-events: none;
         }
 
-        /* Oculta Header/Footer em Fullscreen e esconde o mouse se parado (opcional, foco no visual limpo) */
+        /* Oculta encabezado/pie en pantalla completa y oculta el mouse si está quieto (opcional, foco en visual limpio) */
         .noche-wrapper.is-fullscreen .noche-header,
         .noche-wrapper.is-fullscreen .noche-footer {
           opacity: 0;
@@ -297,15 +297,15 @@ export default function NocheDeOracionPage() {
           100% { opacity: 1; box-shadow: 0 0 8px #ff3b3b; }
         }
 
-        /* PRAYER WALL (CONTAINER CENTRAL RESTRITO) */
+        /* PRAYER WALL (CONTAINER CENTRAL RESTRINGIDO) */
         .prayer-wall-container {
           position: relative;
-          flex: 1; 
+          flex: 1;
           z-index: 5;
-          margin: 0 20px; /* Margem extra de segurança horizontal */
-          overflow: hidden; /* Corta qualquer elemento (luz ou chama) que tentar vazar do container */
-          /* padding interno não segura a vela posicionada absoluta caso ela tenha % left muito próximo da borda
-             então o translate e o bound no JS mantêm tudo dentro do overflow. */
+          margin: 0 20px; /* Margen extra de seguridad horizontal */
+          overflow: hidden; /* Corta cualquier elemento (luz o llama) que intente salir del container */
+          /* El padding interno no retiene la vela posicionada de forma absoluta si tiene un % left muy cerca del borde,
+             por eso el translate y el bound en JS mantienen todo dentro del overflow. */
         }
 
         .bokeh-container, .candles-container {
@@ -405,7 +405,7 @@ export default function NocheDeOracionPage() {
           border-color: var(--gold);
         }
 
-        /* Ajustes Responsivos para Mobile */
+        /* Ajustes responsivos para móvil */
         @media (max-width: 768px) {
           .noche-header {
             padding: 1rem;
