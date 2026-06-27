@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -206,7 +206,7 @@ export default function VelaMemorialPage({ params }: { params: Promise<{ id: str
             {candle.mensagem && (
               <div className="memorial-message">
                 <p className="quote" style={{ borderLeft: "2px solid var(--gold)", paddingLeft: "1.2rem", fontStyle: "italic", color: "var(--white)", fontSize: "1.1rem", marginBottom: "3rem", wordBreak: "break-word", overflowWrap: "break-word" }}>
-                  "{candle.mensagem}"
+                  &ldquo;{candle.mensagem}&rdquo;
                 </p>
               </div>
             )}

@@ -30,15 +30,16 @@ function alturaAtual(criadoEm: string, dias: number, maxAltura: number) {
 
 export default function NocheDeOracionPage() {
   const [candles, setCandles] = useState<Candle[]>([]);
-  const [viewers, setViewers] = useState(42);
+  const [viewers, setViewers] = useState(() => Math.floor(Math.random() * (148 - 14 + 1)) + 14);
   const [isMuted, setIsMuted] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // Posiciones fijas para las velas basadas en porcentaje (asignadas al recibir datos).
+  const [candlePositions, setCandlePositions] = useState<{ [id: string]: { left: number, top: number, scale: number, zIndex: number, glowDur: number, flameDur: number } }>({});
+
   // Simulación de espectadores (14 a 148)
   useEffect(() => {
-    setViewers(Math.floor(Math.random() * (148 - 14 + 1)) + 14);
-    
     const viewerInterval = setInterval(() => {
       setViewers(prev => {
         const change = Math.floor(Math.random() * 7) - 3; // -3 to +3
@@ -62,6 +63,25 @@ export default function NocheDeOracionPage() {
             // Solo velas no expiradas
             const active = data.filter(c => diasRestantes(c.criadoEm, c.dias) > 0);
             setCandles(active);
+            // Asigna posiciones estables a las velas nuevas (en el callback, no en render).
+            setCandlePositions(prev => {
+              const newPos = { ...prev };
+              let changed = false;
+              active.forEach(c => {
+                if (!newPos[c.id]) {
+                  changed = true;
+                  newPos[c.id] = {
+                    left: 5 + Math.random() * 90,
+                    top: 10 + Math.random() * 85,
+                    scale: 0.5 + Math.random() * 0.7,
+                    zIndex: Math.floor(Math.random() * 100),
+                    glowDur: 2.5 + Math.random(),
+                    flameDur: 2.3 + Math.random(),
+                  };
+                }
+              });
+              return changed ? newPos : prev;
+            });
           }
         })
         .catch(console.error);
@@ -105,42 +125,17 @@ export default function NocheDeOracionPage() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
-  // Generar posiciones fijas para las velas basadas en porcentaje
-  // Como usan porcentaje y están dentro de prayer-wall-container, se ajustan automáticamente al redimensionar.
-  const [candlePositions, setCandlePositions] = useState<{ [id: string]: { left: number, top: number, scale: number, zIndex: number } }>({});
-  
-  useEffect(() => {
-    setCandlePositions(prev => {
-      const newPos = { ...prev };
-      let changed = false;
-      candles.forEach(c => {
-        if (!newPos[c.id]) {
-          changed = true;
-          newPos[c.id] = {
-            left: 5 + Math.random() * 90, // 5% a 95% do prayer-wall-container
-            top: 10 + Math.random() * 85, // 10% a 95% do prayer-wall-container
-            scale: 0.5 + Math.random() * 0.7, // 0.5 a 1.2
-            zIndex: Math.floor(Math.random() * 100)
-          };
-        }
-      });
-      return changed ? newPos : prev;
-    });
-  }, [candles]);
-
-  // Fondo con luces Bokeh
-  const [bokehs, setBokehs] = useState<{ id: number, left: number, top: number, size: number, delay: number, duration: number }[]>([]);
-  useEffect(() => {
-    const b = Array.from({ length: 150 }).map((_, i) => ({
+  // Fondo con luces Bokeh (generado una única vez en el mount)
+  const [bokehs] = useState(() =>
+    Array.from({ length: 150 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
       top: Math.random() * 100,
       size: 2 + Math.random() * 8,
       delay: Math.random() * 5,
-      duration: 3 + Math.random() * 4
-    }));
-    setBokehs(b);
-  }, []);
+      duration: 3 + Math.random() * 4,
+    }))
+  );
 
   return (
     <div className={`noche-wrapper ${isFullscreen ? 'is-fullscreen' : ''}`}>
@@ -196,8 +191,8 @@ export default function NocheDeOracionPage() {
                 }}
               >
                 <div className="flame-wrap">
-                  <div className="glow" style={{ animationDuration: `${2.5 + Math.random()}s` }}></div>
-                  <div className="flame" style={{ animationDuration: `${2.3 + Math.random()}s` }}></div>
+                  <div className="glow" style={{ animationDuration: `${pos.glowDur}s` }}></div>
+                  <div className="flame" style={{ animationDuration: `${pos.flameDur}s` }}></div>
                   <div className="wick"></div>
                   <div className="wax" style={{ height: `${alturaAtual(c.criadoEm, c.dias, c.maxAltura)}px` }}></div>
                 </div>

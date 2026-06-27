@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Scripts de manutenção standalone (CommonJS, fora do app Next.js):
+    "clear-db.js",
   ]),
 ]);
 

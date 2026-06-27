@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, FormEvent, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 // Types
@@ -47,6 +47,9 @@ export default function Home() {
 
   const [formDias, setFormDias] = useState(30);
 
+  // Referência de tempo capturada no mount para filtros por idade (puro no render).
+  const [now] = useState(() => Date.now());
+
   const formNomeRef = useRef<HTMLInputElement>(null);
   const formMsgRef = useRef<HTMLTextAreaElement>(null);
   const formCompradorRef = useRef<HTMLInputElement>(null);
@@ -90,7 +93,6 @@ export default function Home() {
 
   const getFilteredCandles = () => {
     const q = stripAccents(searchQuery.trim());
-    const now = Date.now();
     return candles.filter((c) => {
       if (q && !stripAccents(c.nome).includes(q)) return false;
       const ageDays = (now - new Date(c.criadoEm).getTime()) / 86400000;
@@ -165,26 +167,31 @@ export default function Home() {
     }
   };
 
-  // Ambient embers generator
-  const [embers, setEmbers] = useState<number[]>([]);
-  useEffect(() => {
-    setEmbers(Array.from({ length: 36 }).map((_, i) => i));
-  }, []);
+  // Ambient embers generator (gerado uma única vez no mount via lazy initializer)
+  const [embers] = useState(() =>
+    Array.from({ length: 36 }).map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      duration: 10 + Math.random() * 14,
+      delay: Math.random() * 14,
+      opacity: 0.3 + Math.random() * 0.5,
+    }))
+  );
 
   return (
     <>
       <div className="ambient" aria-hidden="true">
         <div className="rays"></div>
         <div className="embers">
-          {embers.map((i) => (
+          {embers.map((e) => (
             <div
-              key={i}
+              key={e.id}
               className="ember"
               style={{
-                left: `${Math.random() * 100}%`,
-                animationDuration: `${10 + Math.random() * 14}s`,
-                animationDelay: `${Math.random() * 14}s`,
-                opacity: 0.3 + Math.random() * 0.5,
+                left: `${e.left}%`,
+                animationDuration: `${e.duration}s`,
+                animationDelay: `${e.delay}s`,
+                opacity: e.opacity,
               }}
             ></div>
           ))}
@@ -367,7 +374,7 @@ export default function Home() {
               <p className="eyebrow">Sobre el proyecto</p>
               <h2>Un espacio para la luz que la distancia no alcanza</h2>
               <p>La Voz de la Cruz nació como una extensión de nuestro canal de fe — un lugar para transformar la oración en algo visible. Aquí, cada vela encendida lleva un nombre, una nostalgia, un pedido o un agradecimiento.</p>
-              <p className="quote">"La luz física no siempre alcanza a quienes amamos. La luz digital puede atravesar cualquier distancia y seguir ardiendo por ellos."</p>
+              <p className="quote">&ldquo;La luz física no siempre alcanza a quienes amamos. La luz digital puede atravesar cualquier distancia y seguir ardiendo por ellos.&rdquo;</p>
               <p>Creemos que homenajear es un acto de fe continuo. Por eso, cada vela permanece encendida por el tiempo elegido — manteniendo viva la memoria de quien representa.</p>
             </div>
           </div>
