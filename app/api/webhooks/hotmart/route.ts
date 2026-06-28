@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       const maxAltura = plan?.maxAltura ?? calcMaxAltura(dias);
 
       // Busca no banco se há uma vela pendente aguardando pagamento deste comprador
-      const compradorEmail = eventData.buyer?.email;
+      const compradorEmail = eventData.buyer?.email?.toLowerCase();
       const nomeComprador = eventData.buyer?.name || "Anônimo";
 
       if (compradorEmail) {

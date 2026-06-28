@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     nome = (nome || "Homenageado").substring(0, 100);
     mensagem = (mensagem || "").substring(0, 500);
     comprador = (comprador || "Anônimo").substring(0, 100);
-    email = email ? String(email).substring(0, 100) : null;
+    email = email ? String(email).substring(0, 100).toLowerCase() : null;
 
     // Criamos a vela como PENDENTE no banco.
     // Usamos um transactionId temporário pois o MongoDB bloqueia múltiplos campos null com @unique
